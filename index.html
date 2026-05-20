@@ -136,9 +136,10 @@
        .bank-name-block { display: flex; align-items: center; gap: 12px; }
        .bank-title { font-weight: 600; font-size: 16px; }
        .bank-amount { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
-       .bank-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); padding-left: 34px; }
+       .bank-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); padding-left: 34px; flex-wrap: wrap; gap: 8px; }
        .plafond-input { width: 65px; padding: 4px 6px; font-size: 13px; border-radius: 8px; text-align: center; display: inline-block; border: 1px solid var(--border); }
-       .marge-input { width: 60px; padding: 4px 6px; font-size: 13px; border-radius: 8px; text-align: center; display: inline-block; border: 1px solid var(--border); font-weight: bold; color: var(--danger); }
+       .marge-input { width: 55px; padding: 4px 6px; font-size: 13px; border-radius: 8px; text-align: center; display: inline-block; border: 1px solid var(--border); font-weight: bold; color: var(--danger); }
+       .aides-input { width: 55px; padding: 4px 6px; font-size: 13px; border-radius: 8px; text-align: center; display: inline-block; border: 1px solid var(--border); font-weight: bold; color: #5856d6; }
        .savings-input-global {
            width: 110px; font-size: 18px; font-weight: 800; color: #248a3d;
            border: 1px solid rgba(52,199,89,0.3); border-radius: 10px; padding: 6px 8px; text-align: right; background: #ffffff;
@@ -193,6 +194,10 @@
 <div class="balance-row">
 <div class="balance-cell-left">Salaire mensuel net :</div>
 <div class="balance-cell-right" id="dashSalary">0,00 €</div>
+</div>
+<div class="balance-row" style="color: #d1cfff;">
+<div class="balance-cell-left">Aides sociales (+) :</div>
+<div class="balance-cell-right" id="dashAides">0,00 €</div>
 </div>
 <div class="balance-row" style="color: #ffb3b3;">
 <div class="balance-cell-left">Sécurité Crédit Agricole (-) :</div>
@@ -272,8 +277,9 @@
 <span class="bank-amount text-danger" id="distCA">0,00 €</span>
 </div>
 <div class="bank-bottom">
-<span id="formulaCA">Reste des charges + Secu</span>
+<span id="formulaCA" style="flex: 1 1 100%;">Reste des charges + Secu + Aides</span>
 <span>Sécurité : <input type="number" id="margeCA" class="marge-input" value="50" oninput="calculateDistribution()"> €</span>
+<span>Aides : <input type="number" id="aidesSocialesInput" class="aides-input" value="0" oninput="calculateDistribution()"> €</span>
 </div>
 </div>
 <div class="bank-item">
@@ -359,6 +365,7 @@
        let plafondBourso = localStorage.getItem('plafondBourso') || 430;
        let plafondFortuneo = localStorage.getItem('plafondFortuneo') || 800;
        let margeCA = localStorage.getItem('margeCA') || 50;
+       let aidesSociales = localStorage.getItem('aidesSociales') || 0;
        let globalSavings = parseFloat(localStorage.getItem('globalSavings')) || 0;
        let monthlySavingsOverride = localStorage.getItem('monthlySavingsOverride') || null;
        let currentMonthWithdrawals = parseFloat(localStorage.getItem('currentMonthWithdrawals')) || 0;
@@ -370,6 +377,7 @@
        document.getElementById('plafondBourso').value = plafondBourso;
        document.getElementById('plafondFortuneo').value = plafondFortuneo;
        document.getElementById('margeCA').value = margeCA;
+       document.getElementById('aidesSocialesInput').value = aidesSociales;
        document.getElementById('globalSavingsInput').value = globalSavings;
        document.getElementById('checkBourso').checked = checkBoursoState;
        document.getElementById('checkFortuneo').checked = checkFortuneoState;
@@ -380,6 +388,7 @@
            localStorage.setItem('plafondBourso', document.getElementById('plafondBourso').value);
            localStorage.setItem('plafondFortuneo', document.getElementById('plafondFortuneo').value);
            localStorage.setItem('margeCA', document.getElementById('margeCA').value);
+           localStorage.setItem('aidesSociales', document.getElementById('aidesSocialesInput').value);
            localStorage.setItem('globalSavings', globalSavings);
            localStorage.setItem('monthlySavingsOverride', monthlySavingsOverride !== null ? monthlySavingsOverride : '');
            localStorage.setItem('currentMonthWithdrawals', currentMonthWithdrawals);
@@ -436,7 +445,6 @@
            calculateDistribution();
        }
        function handleSavingsManualInput() {
-           // Si l'épargne est modifiée alors qu'elle est déjà cochée, on retire l'ancienne valeur du coffre avant d'appliquer la nouvelle
            const isChecked = document.getElementById('checkSavings').checked;
            const oldSavingsValue = parseFloat(document.getElementById('distSavingsInput').value) || 0;
            if (isChecked) {
@@ -491,6 +499,8 @@
            const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
            const rawMarge = document.getElementById('margeCA').value;
            const baseMargeCA = (rawMarge === "" || isNaN(parseFloat(rawMarge))) ? 0 : parseFloat(rawMarge);
+           const rawAides = document.getElementById('aidesSocialesInput').value;
+           const aidesSocialesVal = (rawAides === "" || isNaN(parseFloat(rawAides))) ? 0 : parseFloat(rawAides);
            let totalExpenses = 0;
            let paidExpenses = 0;
            expenses.forEach(e => {
@@ -498,9 +508,11 @@
                if(e.checked) paidExpenses += e.amount;
            });
            let resteAPayer = totalExpenses - paidExpenses;
-           let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA) : 0;
-           if (tempCaAmount > salaryVal) tempCaAmount = salaryVal;
-           let tempRestant = salaryVal - tempCaAmount;
+           // Calcul de la capacité de dispatching (Salaire dispo après reste à payer et base de sécurité + aides)
+           let totalRevenus = salaryVal + aidesSocialesVal;
+           let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA + aidesSocialesVal) : 0;
+           if (tempCaAmount > totalRevenus) tempCaAmount = totalRevenus;
+           let tempRestant = totalRevenus - tempCaAmount;
            let boursoAmount = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
            tempRestant -= boursoAmount;
            let fortuneoAmount = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
@@ -510,11 +522,12 @@
            let savingsAmount = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
            let perteArrondi = rawSavings - savingsAmount;
            let finalMargeCA = baseMargeCA + perteArrondi;
-           let caAmount = salaryVal > 0 ? (resteAPayer + finalMargeCA) : 0;
-           if (caAmount > salaryVal) caAmount = salaryVal;
+           // Enveloppe CA définitive intégrant les charges, la marge ajustée et l'intégralité des aides
+           let caAmount = salaryVal > 0 ? (resteAPayer + finalMargeCA + aidesSocialesVal) : 0;
+           if (caAmount > totalRevenus) caAmount = totalRevenus;
            document.getElementById('distCA').innerText = `${caAmount.toFixed(2)} €`;
-           document.getElementById('formulaCA').innerText = `Reste des charges (${resteAPayer.toFixed(2)}€) + Sécurité ajustée (${finalMargeCA.toFixed(2)}€)`;
-           let reelRestant = salaryVal - caAmount;
+           document.getElementById('formulaCA').innerText = `Charges (${resteAPayer.toFixed(2)}€) + Sécu (${finalMargeCA.toFixed(2)}€) + Aides (${aidesSocialesVal.toFixed(2)}€)`;
+           let reelRestant = totalRevenus - caAmount;
            boursoAmount = reelRestant > 0 ? Math.min(reelRestant, pBourso) : 0;
            reelRestant -= boursoAmount;
            fortuneoAmount = reelRestant > 0 ? Math.min(reelRestant, pFortuneo) : 0;
@@ -534,16 +547,17 @@
            if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
            if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
            if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
-           // JAUGE 1 : RESTE À VIVRE MENSUEL
-           let monthlyRemaining = salaryVal - (placementsValides + paidExpenses);
+           // NOUVELLE FORMULE : (Salaire mensuel net + Aides sociales) - (Placements validés + Dépenses réelles payées)
+           let monthlyRemaining = (salaryVal + aidesSocialesVal) - (placementsValides + paidExpenses);
            document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
+           document.getElementById('dashAides').innerText = `${aidesSocialesVal.toFixed(2)} €`;
            document.getElementById('dashMargeCA').innerText = `${finalMargeCA.toFixed(2)} €`;
            document.getElementById('dashPlacements').innerText = `${placementsValides.toFixed(2)} €`;
            document.getElementById('dashPaidExpenses').innerText = `${paidExpenses.toFixed(2)} €`;
            document.getElementById('salaryRemaining').innerText = `${monthlyRemaining.toFixed(2)} €`;
            const bar = document.getElementById('progressBar');
-           if (salaryVal > 0) {
-               let pct = (monthlyRemaining / salaryVal) * 100;
+           if (totalRevenus > 0) {
+               let pct = (monthlyRemaining / totalRevenus) * 100;
                pct = Math.max(0, Math.min(100, pct));
                bar.style.width = `${pct}%`;
                if (pct > 40) bar.style.backgroundColor = 'var(--success)';
@@ -620,7 +634,6 @@
            }
        }
        function toggleBankCheck() { updateBankStyles(); calculateDistribution(); }
-       // Nouvelle fonction pour la coche de l'épargne du mois
        function toggleSavingsCheck() {
            const isChecked = document.getElementById('checkSavings').checked;
            const savingsValue = parseFloat(document.getElementById('distSavingsInput').value) || 0;
@@ -687,7 +700,6 @@
            if(confirmation) {
                let currentSavingsAmount = 0;
                let valSavings = parseFloat(document.getElementById('distSavingsInput').value) || 0;
-               // Si la case N'ÉTAIT PAS cochée, on l'ajoute maintenant au coffre. Si elle l'était, elle y est déjà !
                if(!document.getElementById('checkSavings').checked) {
                    currentSavingsAmount = valSavings;
                    globalSavings += currentSavingsAmount;
@@ -697,25 +709,25 @@
                let dateObj = new Date();
                let labelDate = dateObj.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
                const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
+               const aidesVal = parseFloat(document.getElementById('aidesSocialesInput').value) || 0;
                let paidExpenses = 0;
                expenses.forEach(e => { if(e.checked) paidExpenses += e.amount; });
                let pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
                let pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
-               let rawMarge = document.getElementById('margeCA').value;
-               let baseMargeCA = (rawMarge === "" || isNaN(parseFloat(rawMarge))) ? 0 : parseFloat(rawMarge);
+               let baseMargeCA = parseFloat(document.getElementById('margeCA').value) || 0;
                let resteAPayer = totalExp - paidExpenses;
-               let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA) : 0;
-               if (tempCaAmount > salaryVal) tempCaAmount = salaryVal;
-               let tempRestant = salaryVal - tempCaAmount;
+               let totalRevenus = salaryVal + aidesVal;
+               let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA + aidesVal) : 0;
+               if (tempCaAmount > totalRevenus) tempCaAmount = totalRevenus;
+               let tempRestant = totalRevenus - tempCaAmount;
                let bAmt = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
                tempRestant -= bAmt;
                let fAmt = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
                tempRestant -= fAmt;
                let computedSavings = roundToNearestTen(tempRestant > 0 ? tempRestant : 0);
                let sAmt = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
-               // On simule comme si tout avait été validé pour graver le bon historique
                let pValides = bAmt + fAmt + sAmt;
-               let monthlyRemainingLog = salaryVal - (pValides + paidExpenses);
+               let monthlyRemainingLog = (salaryVal + aidesVal) - (pValides + paidExpenses);
                historyLog.push({
                    date: labelDate.charAt(0).toUpperCase() + labelDate.slice(1),
                    sal: salaryVal.toFixed(0),
@@ -745,6 +757,7 @@
                plafondBourso: document.getElementById('plafondBourso').value,
                plafondFortuneo: document.getElementById('plafondFortuneo').value,
                margeCA: document.getElementById('margeCA').value,
+               aidesSociales: document.getElementById('aidesSocialesInput').value,
                globalSavings,
                monthlySavingsOverride,
                currentMonthWithdrawals,
@@ -763,12 +776,14 @@
                if (parsed.plafondBourso) document.getElementById('plafondBourso').value = parsed.plafondBourso;
                if (parsed.plafondFortuneo) document.getElementById('plafondFortuneo').value = parsed.plafondFortuneo;
                if (parsed.margeCA) document.getElementById('margeCA').value = parsed.margeCA;
+               if (parsed.aidesSociales) document.getElementById('aidesSocialesInput').value = parsed.aidesSociales;
                if (parsed.globalSavings !== undefined) globalSavings = parsed.globalSavings;
                if (parsed.monthlySavingsOverride !== undefined) monthlySavingsOverride = parsed.monthlySavingsOverride;
                if (parsed.currentMonthWithdrawals !== undefined) currentMonthWithdrawals = parsed.currentMonthWithdrawals;
                if (parsed.historyLog) historyLog = parsed.historyLog;
                document.getElementById('globalSavingsInput').value = globalSavings;
                document.getElementById('margeCA').value = parsed.margeCA || 50;
+               document.getElementById('aidesSocialesInput').value = parsed.aidesSociales || 0;
                saveToLocalStorage();
                render();
                alert("Données importées avec succès !");
