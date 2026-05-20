@@ -535,13 +535,15 @@
                document.getElementById('savingsFormatIntel').innerText = `Épargne forcée manuellement`;
            } else {
                document.getElementById('savingsFormatIntel').innerText = `Arrondi inf. : +${perteArrondi.toFixed(2)}€ laissés sur le CA`;
-           }  
+           } 
+           let safemoney = 50
+           if(document.getElementById('margeCA').value) safemoney = margeCA       
            let placementsValides = 0;
            if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
            if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
            if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
            // Formule Reste à vivre : (Salaire + Aides) - (Placements validés + Dépenses payées)
-           let monthlyRemaining = (salaryVal + aidesSocialesVal) - (margeCA + placementsValides + paidExpenses);
+           let monthlyRemaining = (salaryVal + aidesSocialesVal) - (safemoney + placementsValides + paidExpenses);
            document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
            document.getElementById('dashAides').innerText = `${aidesSocialesVal.toFixed(2)} €`;
            document.getElementById('dashMargeCA').innerText = `${finalMargeCA.toFixed(2)} €`;
