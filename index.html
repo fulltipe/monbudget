@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mon Budget">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAucQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDwP3gDwt8AnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAucQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
 <title>Mon Budget Master Pro</title>
 <style>
       :root {
@@ -36,7 +36,7 @@
           font-weight: 800;
           margin: 24px 0 16px 0;
           letter-spacing: -0.5px;
-        }
+      }
       h2 {
           font-size: 13px;
           font-weight: 700;
@@ -509,15 +509,13 @@
           });
           let resteAPayer = totalExpenses - paidExpenses;
           let totalRevenus = salaryVal + aidesSocialesVal;
-          // CALCUL 1 : Distribution sans déduction préalable de la sécurité
-          let tempRestantPourPlacements = totalRevenus - totalExpenses;
+          let tempRestantPourPlacements = totalRevenus - (totalExpenses + baseMargeCA);
           let boursoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pBourso) : 0;
           tempRestantPourPlacements -= boursoAmount;
           let fortuneoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
-          // Formule demandée : (Salaire net reçu + aide sociale) - (Total dépenses + Bourso + Fortuneo) = épargne du mois
-          let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount);
+          // NOUVELLE FORMULE CORRIGÉE : (Salaire + Aides) - (Sécurité CA + Total liste dépenses + Bourso + Fortuneo)
+          let rawSavings = totalRevenus - (baseMargeCA + totalExpenses + boursoAmount + fortuneoAmount);
           if (rawSavings < 0) rawSavings = 0;
-          // Reste de l'arrondi inf. conservé sur le compte Crédit Agricole
           let computedSavings = roundToNearestTenLower(rawSavings);
           let savingsAmount = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
           let perteArrondi = rawSavings - savingsAmount;
@@ -540,7 +538,7 @@
           if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
           if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
           if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
-          // CALCUL 2 : (Salaire net + aide sociale) - (sécurité CA + placements validés + dépenses réelles cochées) = reste à vivre
+          // NOUVELLE FORMULE CORRIGÉE FLUX MENSUEL : (Salaire + Aides) - (Sécurité CA + Placements validés + Dépenses payées)
           let monthlyRemaining = (salaryVal + aidesSocialesVal) - (finalMargeCA + placementsValides + paidExpenses);
           document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
           document.getElementById('dashAides').innerText = `${aidesSocialesVal.toFixed(2)} €`;
@@ -557,7 +555,6 @@
               else if (pct > 15) bar.style.backgroundColor = 'var(--warning)';
               else bar.style.backgroundColor = 'var(--danger)';
           } else { bar.style.width = '0%'; }
-          // JAUGE 2 : RESTE À VIVRE TOTAL
           let totalRemainingWallet = (globalSavings + monthlyRemaining) - currentMonthWithdrawals;
           document.getElementById('dashGlobalSavings').innerText = `${globalSavings.toFixed(2)} €`;
           document.getElementById('dashSalaryTotalCard').innerText = `${monthlyRemaining.toFixed(2)} €`;
@@ -709,18 +706,19 @@
               let pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
               let baseMargeCA = parseFloat(document.getElementById('margeCA').value) || 0;
               let totalRevenus = salaryVal + aidesVal;
-              let tempRestantPourPlacements = totalRevenus - totalExp;
+              let tempRestantPourPlacements = totalRevenus - (totalExp + baseMargeCA);
               let bAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pBourso) : 0;
               tempRestantPourPlacements -= bAmt;
               let fAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
-              let rawSavings = totalRevenus - (totalExp + bAmt + fAmt);
+              // Application de la formule corrigée pour l'historique de fin de mois
+              let rawSavings = totalRevenus - (baseMargeCA + totalExp + bAmt + fAmt);
               if (rawSavings < 0) rawSavings = 0;
               let computedSavings = roundToNearestTenLower(rawSavings);
               let sAmt = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
               let perteArrondi = rawSavings - sAmt;
-              let finalMargeCA = baseMargeCA + perteArrondi;
+              let finalMargeCALog = baseMargeCA + perteArrondi;
               let pValides = bAmt + fAmt + sAmt;
-              let monthlyRemainingLog = (salaryVal + aidesVal) - (finalMargeCA + pValides + paidExpenses);
+              let monthlyRemainingLog = (salaryVal + aidesVal) - (finalMargeCALog + pValides + paidExpenses);
               historyLog.push({
                   date: labelDate.charAt(0).toUpperCase() + labelDate.slice(1),
                   sal: salaryVal.toFixed(0),
