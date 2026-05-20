@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mon Budget">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAucQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDwP3gDwt8AnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAucQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDwP3gDwt8AnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
 <title>Mon Budget Master Pro</title>
 <style>
        :root {
@@ -331,9 +331,12 @@
 <div id="cancelEditBox" style="display:none; text-align:right; margin-bottom:10px; font-size:13px;">
 <a href="#" onclick="cancelEdit()" style="color:var(--danger); text-decoration:none;">Annuler la modification</a>
 </div>
+<div style="display: flex; justify-content: space-between; align-items: center;">
 <h2>Liste des dépenses</h2>
+<span id="totalExpensesDisplay" style="font-size: 14px; font-weight: 700; color: var(--text-secondary); margin-right: 4px;">Total : 0,00 €</span>
+</div>
 <div class="list-container" id="expenseList"></div>
-<button class="btn-reset" onclick="triggerNewMonth()">🔄 Commencer un Nouveau Mois</button>
+<button class="btn-reset" onclick="triggerNewMonth()" style="margin-top: 25px;">🔄 Commencer un Nouveau Mois</button>
 <h2>Historique des mois passés</h2>
 <div class="card" id="historyContainer" style="max-height: 200px; overflow-y: auto; padding-top: 4px; padding-bottom: 4px;"></div>
 <h2>Sauvegarde Système (Import / Export)</h2>
@@ -409,7 +412,7 @@
                `;
                list.appendChild(row);
            });
-           document.getElementById('totalExpenses').innerText = `${total.toFixed(2)} €`;
+           document.getElementById('totalExpensesDisplay').innerText = `Total : ${total.toFixed(2)} €`;
            renderHistory();
            updateBankStyles();
            calculateDistribution();
@@ -462,7 +465,6 @@
            const pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
            const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
            const mCA = parseFloat(document.getElementById('margeCA').value) || 0;
-           // 1. CALCULS DES PLACEMENTS ET CHARGES
            let totalExpenses = 0;
            let paidExpenses = 0;
            expenses.forEach(e => {
@@ -470,7 +472,6 @@
                if(e.checked) paidExpenses += e.amount;
            });
            let resteAPayer = totalExpenses - paidExpenses;
-           // Calcul théorique des répartitions bancaires
            let caAmount = salaryVal > 0 ? (resteAPayer + mCA) : 0;
            if (caAmount > salaryVal) caAmount = salaryVal;
            document.getElementById('distCA').innerText = `${caAmount.toFixed(2)} €`;
@@ -493,12 +494,11 @@
            document.getElementById('distSavings').innerText = `${savingsAmount} €`;
            let perteArrondi = rawSavings - savingsAmount;
            document.getElementById('savingsFormatIntel').innerText = `Arrondi appliqué (-${perteArrondi.toFixed(2)}€)`;
-           // Calcul des placements REELLEMENT validés (cochés)
            let placementsValides = 0;
            if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
            if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
            if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
-           // 2. JAUGE 1 : RESTE À VIVRE MENSUEL
+           // JAUGE 1 : RESTE À VIVRE MENSUEL
            let monthlyRemaining = salaryVal - (placementsValides + paidExpenses);
            document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
            document.getElementById('dashPlacements').innerText = `${placementsValides.toFixed(2)} €`;
@@ -513,8 +513,7 @@
                else if (pct > 15) bar.style.backgroundColor = 'var(--warning)';
                else bar.style.backgroundColor = 'var(--danger)';
            } else { bar.style.width = '0%'; }
-           // 3. JAUGE 2 : RESTE À VIVRE TOTAL (PATRIMOINE GLOBAL)
-           // CORRECTION : (Épargne totale + Reste à vivre mensuel) - Désépargne effectuée
+           // JAUGE 2 : RESTE À VIVRE TOTAL
            let totalRemainingWallet = (globalSavings + monthlyRemaining) - currentMonthWithdrawals;
            document.getElementById('dashGlobalSavings').innerText = `${globalSavings.toFixed(2)} €`;
            document.getElementById('dashSalaryTotalCard').innerText = `${monthlyRemaining.toFixed(2)} €`;
@@ -526,7 +525,6 @@
                let pctTotal = (totalRemainingWallet / baseTotalVolume) * 100;
                totalBar.style.width = `${Math.max(0, Math.min(100, pctTotal))}%`;
            } else { totalBar.style.width = '0%'; }
-           // Label informatif sous le coffre
            if (currentMonthWithdrawals > 0) {
                document.getElementById('savingsSubtext').innerText = `Désépargne active de ${currentMonthWithdrawals.toFixed(2)}€`;
            } else {
@@ -638,25 +636,34 @@
            let confirmation = confirm("Voulez-vous clôturer ce mois ? Les cases dépenses seront décochées, l'épargne du mois sera ajoutée au coffre, et la situation sera figée dans votre Historique.");
            if(confirmation) {
                let currentSavingsAmount = 0;
+               // Si la case épargne était cochée, on l'ajoute au coffre global
                if(document.getElementById('checkSavings').checked) {
-                   currentSavingsAmount = roundToFirstDigit(parseFloat(document.getElementById('distSavings').innerText) || 0);
+                   let textSavings = document.getElementById('distSavings').innerText;
+                   currentSavingsAmount = roundToFirstDigit(parseFloat(textSavings) || 0);
                    globalSavings += currentSavingsAmount;
                }
+               // Récupération du total des dépenses actuelles pour l'historique
+               let totalExp = 0;
+               expenses.forEach(e => totalExp += e.amount);
                let dateObj = new Date();
                let labelDate = dateObj.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
-               let currentExpTotal = parseFloat(document.getElementById('totalExpenses').innerText) || 0;
+               // Enregistrement dans l'historique
                historyLog.push({
                    date: labelDate.charAt(0).toUpperCase() + labelDate.slice(1),
                    sal: document.getElementById('salaryInput').value || '0',
-                   exp: currentExpTotal.toFixed(0),
+                   exp: totalExp.toFixed(0),
                    sav: currentSavingsAmount
                });
+               // Réinitialisation de la désépargne mensuelle
                currentMonthWithdrawals = 0;
+               // Décocher toutes les dépenses et les banques
                expenses.forEach(e => e.checked = false);
                document.getElementById('checkBourso').checked = false;
                document.getElementById('checkFortuneo').checked = false;
                document.getElementById('checkSavings').checked = false;
+               // Mettre à jour la valeur affichée du coffre fort
                document.getElementById('globalSavingsInput').value = globalSavings;
+               // Demander le nouveau salaire
                let oldSalary = document.getElementById('salaryInput').value;
                let newSalary = prompt("Saisissez le montant du nouveau salaire :", oldSalary);
                if(newSalary !== null) {
