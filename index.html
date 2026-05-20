@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mon Budget">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAucQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAkoQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
 <title>Mon Budget Master Pro</title>
 <style>
       :root {
@@ -723,7 +723,7 @@
               let tempRestantPourPlacements = totalRevenus - (totalExp + baseMargeCA);
               let bAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pBourso) : 0;
               tempRestantPourPlacements -= bAmt;
-              let fAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, fAmt) : 0;
+              let fAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
               let rawSavings = totalRevenus - (baseMargeCA + totalExp + bAmt + fAmt);
               if (rawSavings < 0) rawSavings = 0;
               let computedSavings = roundToNearestTenLower(rawSavings);
