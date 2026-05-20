@@ -516,14 +516,11 @@
            tempRestantPourPlacements -= boursoAmount;
            let fortuneoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
            // Nouvelle Formule : (Salaire + Aides) - (Total liste dépenses + Bourso + Fortuneo)
-           let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount + 50);
+           let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount + finalMargeCA);
            if (rawSavings < 0) rawSavings = 0;
            // Application de l'arrondi à la dizaine INFERIEURE
            let computedSavings = roundToNearestTenLower(rawSavings);
            let savingsAmount = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
-           // Ce qui n'est pas envoyé dans l'épargne suite à l'arrondi inférieur reste au CA
-           let perteArrondi = rawSavings - savingsAmount;
-           let finalMargeCA = baseMargeCA + perteArrondi;
            // Attribution finale au Crédit Agricole (Couvre le reste à payer des charges + la sécurité ajustée + les aides reçues)
            let caAmount = salaryVal > 0 ? (resteAPayer + finalMargeCA + aidesSocialesVal) : 0;
            if (caAmount > totalRevenus) caAmount = totalRevenus;
