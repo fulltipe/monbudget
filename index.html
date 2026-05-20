@@ -516,7 +516,7 @@
            tempRestantPourPlacements -= boursoAmount;
            let fortuneoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
            // Nouvelle Formule : (Salaire + Aides) - (Total liste dépenses + Bourso + Fortuneo)
-           let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount + finalMargeCA);
+           let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount + 50);
            if (rawSavings < 0) rawSavings = 0;
            // Application de l'arrondi à la dizaine INFERIEURE
            let computedSavings = roundToNearestTenLower(rawSavings);
