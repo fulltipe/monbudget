@@ -6,8 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mon Budget">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAucQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDwP3gDwt8AnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
 <title>Mon Budget Master Pro</title>
 <style>
        :root {
@@ -180,9 +179,9 @@
 <div class="balance-cell-left">Salaire mensuel :</div>
 <div class="balance-cell-right" id="dashSalary">0,00 €</div>
 </div>
-<div class="balance-row" id="rowCashback" style="display:none; color: var(--success); font-weight: bold;">
-<div class="balance-cell-left">Récupéré de l'Épargne (+) :</div>
-<div class="balance-cell-right" id="dashCashback">+0,00 €</div>
+<div class="balance-row" id="rowCashback" style="display:none; color: var(--danger); font-weight: bold;">
+<div class="balance-cell-left">Désépargne effectuée (-) :</div>
+<div class="balance-cell-right" id="dashCashback">-0,00 €</div>
 </div>
 <div class="balance-row">
 <div class="balance-cell-left">Total charges prévues :</div>
@@ -203,7 +202,10 @@
 <div class="card" style="background: #e9f5ec; border: 1px solid rgba(52,199,89,0.2); padding: 12px 18px;">
 <div style="display: flex; justify-content: space-between; align-items: center;">
 <div>
+<div style="display: flex; align-items: center; gap: 8px;">
 <div style="font-size: 14px; font-weight: 700; color: #248a3d;">Coffre Épargne Total</div>
+<button onclick="resetSavingsReference()" style="background: none; border: none; color: #34c759; cursor: pointer; width: auto; padding: 0; box-shadow: none; font-size: 12px;" title="Réinitialiser la référence après une erreur">⚡ Réinitialiser</button>
+</div>
 <div style="font-size: 11px; color: #34c759;" id="savingsSubtext">Modifiable à tout moment</div>
 </div>
 <div style="display: flex; align-items: center; gap: 4px;">
@@ -370,14 +372,19 @@
            updateBankStyles();
            calculateDistribution();
        }
+       // CHANGEMENT ICI : On libère la saisie manuelle pour que la référence s'ajuste si on augmente
        function updateGlobalSavingsManual() {
            const val = document.getElementById('globalSavingsInput').value;
            globalSavings = val ? parseFloat(val) : 0;
-           if(globalSavings > referenceSavings) {
-               referenceSavings = globalSavings;
-           }
            saveToLocalStorage();
            calculateDistribution();
+       }
+       // CHANGEMENT ICI : Ajout du bouton de reset pour écraser les erreurs de frappe (ex: un zéro en trop)
+       function resetSavingsReference() {
+           referenceSavings = globalSavings;
+           localStorage.setItem('referenceSavings', referenceSavings);
+           calculateDistribution();
+           alert("La mémoire du coffre a été réinitialisée sur le montant actuel !");
        }
        function roundToFirstDigit(value) {
            if (value <= 0) return 0;
@@ -386,18 +393,23 @@
            let firstDigit = Math.floor(countRound / orderOfMagnitude);
            return firstDigit * orderOfMagnitude;
        }
+       // CHANGEMENT ICI : Logique d'affichage de la désépargne en rouge et en négatif
        function calculateDistribution() {
            const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
            const pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
            const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
            let cashback = 0;
+           const rowCashback = document.getElementById('rowCashback');
+           const dashCashback = document.getElementById('dashCashback');
            if (globalSavings < referenceSavings) {
                cashback = referenceSavings - globalSavings;
-               document.getElementById('rowCashback').style.display = 'table';
-               document.getElementById('dashCashback').innerText = `+${cashback.toFixed(2)} €`;
+               rowCashback.style.display = 'table';
+               // On force la couleur rouge et le signe moins
+               rowCashback.style.color = 'var(--danger)';
+               dashCashback.innerText = `-${cashback.toFixed(2)} €`;
                document.getElementById('savingsSubtext').innerText = `Désépargne active de ${cashback}€`;
            } else {
-               document.getElementById('rowCashback').style.display = 'none';
+               rowCashback.style.display = 'none';
                document.getElementById('savingsSubtext').innerText = `Modifiable à tout moment`;
            }
            let totalAvailableSalary = salaryVal + cashback;
