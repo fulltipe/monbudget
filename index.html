@@ -194,6 +194,10 @@
 <div class="balance-cell-left">Salaire mensuel net :</div>
 <div class="balance-cell-right" id="dashSalary">0,00 €</div>
 </div>
+<div class="balance-row" style="color: #ffb3b3;">
+<div class="balance-cell-left">Sécurité Crédit Agricole (-) :</div>
+<div class="balance-cell-right" id="dashMargeCA">0,00 €</div>
+</div>
 <div class="balance-row">
 <div class="balance-cell-left">Placements validés (Bourso + Fort + Ép) :</div>
 <div class="balance-cell-right" id="dashPlacements">0,00 €</div>
@@ -234,7 +238,7 @@
 </div>
 <div class="card" style="padding: 12px 18px;">
 <label style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Salaire Net Reçu :</label>
-<input type="number" id="salaryInput" placeholder="Saisir salaire" inputmode="decimal" oninput="calculateDistribution()">
+<input type="number" id="salaryInput" placeholder="Saisir salaire" inputmode="decimal" oninput="handleSalaryInput()">
 </div>
 <div class="card" style="background: #e9f5ec; border: 1px solid rgba(52,199,89,0.2); padding: 12px 18px; margin-bottom: 20px;">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -301,13 +305,15 @@
 <div class="bank-item" style="border-bottom: none;">
 <div class="bank-top">
 <div class="bank-name-block">
-<input type="checkbox" id="checkSavings" onchange="toggleBankCheck()">
+<input type="checkbox" id="checkSavings" onchange="toggleSavingsCheck()">
 <span class="bank-title" id="titleSavings">4. Épargne du Mois</span>
 </div>
-<span class="bank-amount" id="distSavings" style="color: #5856d6;">0 €</span>
+<span class="bank-amount" style="color: #5856d6; display: flex; align-items: center; gap: 4px;">
+<input type="number" id="distSavingsInput" class="plafond-input" style="width: 75px; color: #5856d6; font-weight: bold; border-color: rgba(88,86,214,0.3);" oninput="handleSavingsManualInput()"> €
+</span>
 </div>
 <div class="bank-bottom">
-<span id="savingsFormatIntel" style="color:var(--text-secondary);">Arrondi Chiffre + Zéros</span>
+<span id="savingsFormatIntel" style="color:var(--text-secondary);">Reste injecté dans la sécurité CA</span>
 <span id="statusSavings">À transférer</span>
 </div>
 </div>
@@ -354,6 +360,7 @@
        let plafondFortuneo = localStorage.getItem('plafondFortuneo') || 800;
        let margeCA = localStorage.getItem('margeCA') || 50;
        let globalSavings = parseFloat(localStorage.getItem('globalSavings')) || 0;
+       let monthlySavingsOverride = localStorage.getItem('monthlySavingsOverride') || null;
        let currentMonthWithdrawals = parseFloat(localStorage.getItem('currentMonthWithdrawals')) || 0;
        let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
        let checkBoursoState = JSON.parse(localStorage.getItem('checkBoursoState')) || false;
@@ -374,6 +381,7 @@
            localStorage.setItem('plafondFortuneo', document.getElementById('plafondFortuneo').value);
            localStorage.setItem('margeCA', document.getElementById('margeCA').value);
            localStorage.setItem('globalSavings', globalSavings);
+           localStorage.setItem('monthlySavingsOverride', monthlySavingsOverride !== null ? monthlySavingsOverride : '');
            localStorage.setItem('currentMonthWithdrawals', currentMonthWithdrawals);
            localStorage.setItem('historyLog', JSON.stringify(historyLog));
            localStorage.setItem('checkBoursoState', document.getElementById('checkBourso').checked);
@@ -423,6 +431,26 @@
            saveToLocalStorage();
            calculateDistribution();
        }
+       function handleSalaryInput() {
+           monthlySavingsOverride = null;
+           calculateDistribution();
+       }
+       function handleSavingsManualInput() {
+           // Si l'épargne est modifiée alors qu'elle est déjà cochée, on retire l'ancienne valeur du coffre avant d'appliquer la nouvelle
+           const isChecked = document.getElementById('checkSavings').checked;
+           const oldSavingsValue = parseFloat(document.getElementById('distSavingsInput').value) || 0;
+           if (isChecked) {
+               globalSavings -= oldSavingsValue;
+           }
+           const val = document.getElementById('distSavingsInput').value;
+           monthlySavingsOverride = val !== "" ? parseFloat(val) : 0;
+           if (isChecked) {
+               globalSavings += monthlySavingsOverride;
+               document.getElementById('globalSavingsInput').value = globalSavings;
+           }
+           saveToLocalStorage();
+           calculateDistribution();
+       }
        function executeWithdraw() {
            const withdrawField = document.getElementById('withdrawInput');
            const amountToWithdraw = parseFloat(withdrawField.value) || 0;
@@ -453,18 +481,16 @@
                alert("Aucune désépargne n'est active ce mois-ci.");
            }
        }
-       function roundToFirstDigit(value) {
+       function roundToNearestTen(value) {
            if (value <= 0) return 0;
-           let countRound = Math.floor(value);
-           let orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(countRound)));
-           let firstDigit = Math.floor(countRound / orderOfMagnitude);
-           return firstDigit * orderOfMagnitude;
+           return Math.round(value / 10) * 10;
        }
        function calculateDistribution() {
            const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
            const pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
            const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
-           const mCA = parseFloat(document.getElementById('margeCA').value) || 0;
+           const rawMarge = document.getElementById('margeCA').value;
+           const baseMargeCA = (rawMarge === "" || isNaN(parseFloat(rawMarge))) ? 0 : parseFloat(rawMarge);
            let totalExpenses = 0;
            let paidExpenses = 0;
            expenses.forEach(e => {
@@ -472,28 +498,38 @@
                if(e.checked) paidExpenses += e.amount;
            });
            let resteAPayer = totalExpenses - paidExpenses;
-           let caAmount = salaryVal > 0 ? (resteAPayer + mCA) : 0;
+           let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA) : 0;
+           if (tempCaAmount > salaryVal) tempCaAmount = salaryVal;
+           let tempRestant = salaryVal - tempCaAmount;
+           let boursoAmount = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
+           tempRestant -= boursoAmount;
+           let fortuneoAmount = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
+           tempRestant -= fortuneoAmount;
+           let rawSavings = tempRestant > 0 ? tempRestant : 0;
+           let computedSavings = roundToNearestTen(rawSavings);
+           let savingsAmount = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
+           let perteArrondi = rawSavings - savingsAmount;
+           let finalMargeCA = baseMargeCA + perteArrondi;
+           let caAmount = salaryVal > 0 ? (resteAPayer + finalMargeCA) : 0;
            if (caAmount > salaryVal) caAmount = salaryVal;
            document.getElementById('distCA').innerText = `${caAmount.toFixed(2)} €`;
-           document.getElementById('formulaCA').innerText = `Reste des charges (${resteAPayer.toFixed(2)}€) + ${mCA}€`;
-           let restant = salaryVal - caAmount;
-           let boursoAmount = 0;
-           if (restant > 0) {
-               boursoAmount = Math.min(restant, pBourso);
-               restant -= boursoAmount;
-           }
+           document.getElementById('formulaCA').innerText = `Reste des charges (${resteAPayer.toFixed(2)}€) + Sécurité ajustée (${finalMargeCA.toFixed(2)}€)`;
+           let reelRestant = salaryVal - caAmount;
+           boursoAmount = reelRestant > 0 ? Math.min(reelRestant, pBourso) : 0;
+           reelRestant -= boursoAmount;
+           fortuneoAmount = reelRestant > 0 ? Math.min(reelRestant, pFortuneo) : 0;
            document.getElementById('distBourso').innerText = `${boursoAmount.toFixed(2)} €`;
-           let fortuneoAmount = 0;
-           if (restant > 0) {
-               fortuneoAmount = Math.min(restant, pFortuneo);
-               restant -= fortuneoAmount;
-           }
            document.getElementById('distFortuneo').innerText = `${fortuneoAmount.toFixed(2)} €`;
-           let rawSavings = restant > 0 ? restant : 0;
-           let savingsAmount = roundToFirstDigit(rawSavings);
-           document.getElementById('distSavings').innerText = `${savingsAmount} €`;
-           let perteArrondi = rawSavings - savingsAmount;
-           document.getElementById('savingsFormatIntel').innerText = `Arrondi appliqué (-${perteArrondi.toFixed(2)}€)`;
+           if (document.activeElement !== document.getElementById('distSavingsInput')) {
+               document.getElementById('distSavingsInput').value = savingsAmount;
+           }
+           if (monthlySavingsOverride !== null) {
+               document.getElementById('savingsFormatIntel').innerText = `Épargne forcée manuellement`;
+           } else {
+               document.getElementById('savingsFormatIntel').innerText = perteArrondi >= 0
+                   ? `Arrondi : +${perteArrondi.toFixed(2)}€ injectés dans la sécurité CA`
+                   : `Arrondi : ${perteArrondi.toFixed(2)}€ compensés par la sécurité CA`;
+           }
            let placementsValides = 0;
            if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
            if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
@@ -501,6 +537,7 @@
            // JAUGE 1 : RESTE À VIVRE MENSUEL
            let monthlyRemaining = salaryVal - (placementsValides + paidExpenses);
            document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
+           document.getElementById('dashMargeCA').innerText = `${finalMargeCA.toFixed(2)} €`;
            document.getElementById('dashPlacements').innerText = `${placementsValides.toFixed(2)} €`;
            document.getElementById('dashPaidExpenses').innerText = `${paidExpenses.toFixed(2)} €`;
            document.getElementById('salaryRemaining').innerText = `${monthlyRemaining.toFixed(2)} €`;
@@ -583,6 +620,19 @@
            }
        }
        function toggleBankCheck() { updateBankStyles(); calculateDistribution(); }
+       // Nouvelle fonction pour la coche de l'épargne du mois
+       function toggleSavingsCheck() {
+           const isChecked = document.getElementById('checkSavings').checked;
+           const savingsValue = parseFloat(document.getElementById('distSavingsInput').value) || 0;
+           if (isChecked) {
+               globalSavings += savingsValue;
+           } else {
+               globalSavings -= savingsValue;
+           }
+           document.getElementById('globalSavingsInput').value = globalSavings;
+           updateBankStyles();
+           calculateDistribution();
+       }
        function updateBankStyles() {
            const boursorCheck = document.getElementById('checkBourso').checked;
            const fortCheck = document.getElementById('checkFortuneo').checked;
@@ -614,9 +664,9 @@
 <div class="history-left">
 <div class="history-date">${log.date}</div>
 <div class="history-details">
-<span>Sal: ${log.sal}€</span>
-<span>Chg: ${log.exp}€</span>
-<span style="color:var(--success); font-weight:600;">+ Ép: ${log.sav}€</span>
+<span>Salaire: ${log.sal}€</span>
+<span>Charges: ${log.exp}€</span>
+<span style="color:var(--success); font-weight:600;">+ Reste à vivre: ${log.sav}€</span>
 </div>
 </div>
 <button class="action-btn delete-btn" onclick="deleteHistoryItem(${i})" style="padding-left:12px;">✕</button>
@@ -633,37 +683,52 @@
            }
        }
        function triggerNewMonth() {
-           let confirmation = confirm("Voulez-vous clôturer ce mois ? Les cases dépenses seront décochées, l'épargne du mois sera ajoutée au coffre, et la situation sera figée dans votre Historique.");
+           let confirmation = confirm("Voulez-vous clôturer ce mois ? Les cases dépenses seront décochées, l'épargne du mois sera ajoutée au coffre (si pas déjà fait en cochant), et la situation sera figée dans votre Historique.");
            if(confirmation) {
                let currentSavingsAmount = 0;
-               // Si la case épargne était cochée, on l'ajoute au coffre global
-               if(document.getElementById('checkSavings').checked) {
-                   let textSavings = document.getElementById('distSavings').innerText;
-                   currentSavingsAmount = roundToFirstDigit(parseFloat(textSavings) || 0);
+               let valSavings = parseFloat(document.getElementById('distSavingsInput').value) || 0;
+               // Si la case N'ÉTAIT PAS cochée, on l'ajoute maintenant au coffre. Si elle l'était, elle y est déjà !
+               if(!document.getElementById('checkSavings').checked) {
+                   currentSavingsAmount = valSavings;
                    globalSavings += currentSavingsAmount;
                }
-               // Récupération du total des dépenses actuelles pour l'historique
                let totalExp = 0;
                expenses.forEach(e => totalExp += e.amount);
                let dateObj = new Date();
                let labelDate = dateObj.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
-               // Enregistrement dans l'historique
+               const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
+               let paidExpenses = 0;
+               expenses.forEach(e => { if(e.checked) paidExpenses += e.amount; });
+               let pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
+               let pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
+               let rawMarge = document.getElementById('margeCA').value;
+               let baseMargeCA = (rawMarge === "" || isNaN(parseFloat(rawMarge))) ? 0 : parseFloat(rawMarge);
+               let resteAPayer = totalExp - paidExpenses;
+               let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA) : 0;
+               if (tempCaAmount > salaryVal) tempCaAmount = salaryVal;
+               let tempRestant = salaryVal - tempCaAmount;
+               let bAmt = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
+               tempRestant -= bAmt;
+               let fAmt = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
+               tempRestant -= fAmt;
+               let computedSavings = roundToNearestTen(tempRestant > 0 ? tempRestant : 0);
+               let sAmt = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
+               // On simule comme si tout avait été validé pour graver le bon historique
+               let pValides = bAmt + fAmt + sAmt;
+               let monthlyRemainingLog = salaryVal - (pValides + paidExpenses);
                historyLog.push({
                    date: labelDate.charAt(0).toUpperCase() + labelDate.slice(1),
-                   sal: document.getElementById('salaryInput').value || '0',
+                   sal: salaryVal.toFixed(0),
                    exp: totalExp.toFixed(0),
-                   sav: currentSavingsAmount
+                   sav: monthlyRemainingLog.toFixed(0)
                });
-               // Réinitialisation de la désépargne mensuelle
                currentMonthWithdrawals = 0;
-               // Décocher toutes les dépenses et les banques
+               monthlySavingsOverride = null;
                expenses.forEach(e => e.checked = false);
                document.getElementById('checkBourso').checked = false;
                document.getElementById('checkFortuneo').checked = false;
                document.getElementById('checkSavings').checked = false;
-               // Mettre à jour la valeur affichée du coffre fort
                document.getElementById('globalSavingsInput').value = globalSavings;
-               // Demander le nouveau salaire
                let oldSalary = document.getElementById('salaryInput').value;
                let newSalary = prompt("Saisissez le montant du nouveau salaire :", oldSalary);
                if(newSalary !== null) {
@@ -681,6 +746,7 @@
                plafondFortuneo: document.getElementById('plafondFortuneo').value,
                margeCA: document.getElementById('margeCA').value,
                globalSavings,
+               monthlySavingsOverride,
                currentMonthWithdrawals,
                historyLog
            };
@@ -698,6 +764,7 @@
                if (parsed.plafondFortuneo) document.getElementById('plafondFortuneo').value = parsed.plafondFortuneo;
                if (parsed.margeCA) document.getElementById('margeCA').value = parsed.margeCA;
                if (parsed.globalSavings !== undefined) globalSavings = parsed.globalSavings;
+               if (parsed.monthlySavingsOverride !== undefined) monthlySavingsOverride = parsed.monthlySavingsOverride;
                if (parsed.currentMonthWithdrawals !== undefined) currentMonthWithdrawals = parsed.currentMonthWithdrawals;
                if (parsed.historyLog) historyLog = parsed.historyLog;
                document.getElementById('globalSavingsInput').value = globalSavings;
