@@ -327,16 +327,20 @@
 <h2 id="formExpenseTitle">Nouvelle dépense</h2>
 <div class="form-table" style="margin-bottom: 10px;">
 <input type="hidden" id="editIndex" value="-1">
-<div class="form-cell" style="width: 42%;">
+<div class="form-cell" style="width: 38%;">
 <input type="text" id="expenseName" placeholder="Nom (ex: EDF)">
 </div>
-<div class="form-cell" style="width: 25%;">
+<div class="form-cell" style="width: 22%;">
 <input type="number" id="expenseAmount" placeholder="Montant" inputmode="decimal">
 </div>
-<div class="form-cell" style="width: 18%;">
-<input type="text" id="expenseDate" placeholder="JJ/MM" style="padding: 12px 4px; text-align: center;">
-</div>
 <div class="form-cell" style="width: 15%;">
+<input type="text" id="expenseDate" placeholder="JJ/MM" style="padding: 12px 2px; text-align: center;">
+</div>
+<div class="form-cell" style="width: 12%; text-align: center;">
+<input type="checkbox" id="expenseFixed" style="width: 22px; height: 22px; vertical-align: middle;">
+<span style="font-size: 9px; display: block; color: var(--text-secondary); margin-top: 1px;">Fixe</span>
+</div>
+<div class="form-cell" style="width: 13%;">
 <button onclick="saveExpense()" id="btnSubmitExpense">+</button>
 </div>
 </div>
@@ -418,7 +422,7 @@
 </div>
 <input type="checkbox" ${expense.checked ? 'checked' : ''} onchange="toggleCheck(${index})">
 <span class="${expense.checked ? 'checked-text' : ''}">
-                          ${expense.name} ${expense.date ? `<span class="date-badge">${expense.date}</span>` : ''}
+                          ${expense.name} ${expense.fixed ? '<span style="font-size:11px; background:#e9f5ec; color:#248a3d; padding:2px 6px; border-radius:6px; margin-left:4px; font-weight:600;">Fixe</span>' : ''} ${expense.date ? `<span class="date-badge">${expense.date}</span>` : ''}
 </span>
 </div>
 <div style="display: flex; align-items: center; gap:4px;">
@@ -513,7 +517,6 @@
           let boursoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pBourso) : 0;
           tempRestantPourPlacements -= boursoAmount;
           let fortuneoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
-          // NOUVELLE FORMULE CORRIGÉE : (Salaire + Aides) - (Sécurité CA + Total liste dépenses + Bourso + Fortuneo)
           let rawSavings = totalRevenus - (baseMargeCA + totalExpenses + boursoAmount + fortuneoAmount);
           if (rawSavings < 0) rawSavings = 0;
           let computedSavings = roundToNearestTenLower(rawSavings);
@@ -538,7 +541,6 @@
           if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
           if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
           if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
-          // NOUVELLE FORMULE CORRIGÉE FLUX MENSUEL : (Salaire + Aides) - (Sécurité CA + Placements validés + Dépenses payées)
           let monthlyRemaining = (salaryVal + aidesSocialesVal) - (finalMargeCA + placementsValides + paidExpenses);
           document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
           document.getElementById('dashAides').innerText = `${aidesSocialesVal.toFixed(2)} €`;
@@ -577,20 +579,23 @@
           const nameInput = document.getElementById('expenseName');
           const amountInput = document.getElementById('expenseAmount');
           const dateInput = document.getElementById('expenseDate');
+          const fixedInput = document.getElementById('expenseFixed');
           const editIndex = parseInt(document.getElementById('editIndex').value);
           const name = nameInput.value.trim();
           const amount = parseFloat(amountInput.value);
           const date = dateInput.value.trim();
+          const fixed = fixedInput.checked;
           if (name && !isNaN(amount) && amount > 0) {
               if(editIndex === -1) {
-                  expenses.push({ name, amount, date, checked: false });
+                  expenses.push({ name, amount, date, fixed, checked: false });
               } else {
                   expenses[editIndex].name = name;
                   expenses[editIndex].amount = amount;
                   expenses[editIndex].date = date;
+                  expenses[editIndex].fixed = fixed;
                   cancelEdit();
               }
-              nameInput.value = ''; amountInput.value = ''; dateInput.value = '';
+              nameInput.value = ''; amountInput.value = ''; dateInput.value = ''; fixedInput.checked = false;
               saveToLocalStorage();
               render();
           }
@@ -600,6 +605,7 @@
           document.getElementById('expenseName').value = expenses[index].name;
           document.getElementById('expenseAmount').value = expenses[index].amount;
           document.getElementById('expenseDate').value = expenses[index].date || '';
+          document.getElementById('expenseFixed').checked = expenses[index].fixed || false;
           document.getElementById('editIndex').value = index;
           document.getElementById('btnSubmitExpense').innerText = "OK";
           document.getElementById('cancelEditBox').style.display = 'block';
@@ -609,6 +615,7 @@
           document.getElementById('expenseName').value = '';
           document.getElementById('expenseAmount').value = '';
           document.getElementById('expenseDate').value = '';
+          document.getElementById('expenseFixed').checked = false;
           document.getElementById('editIndex').value = "-1";
           document.getElementById('btnSubmitExpense').innerText = "+";
           document.getElementById('cancelEditBox').style.display = 'none';
@@ -651,7 +658,14 @@
           document.getElementById('statusSavings').style.color = saveCheck ? 'var(--success)' : 'var(--text-secondary)';
       }
       function toggleCheck(index) { expenses[index].checked = !expenses[index].checked; saveToLocalStorage(); render(); }
-      function deleteExpense(index) { expenses.splice(index, 1); saveToLocalStorage(); render(); }
+      function deleteExpense(index) {
+          let confirmation = confirm(`Voulez-vous supprimer la dépense "${expenses[index].name}" ?`);
+          if(confirmation) {
+              expenses.splice(index, 1);
+              saveToLocalStorage();
+              render();
+          }
+      }
       function renderHistory() {
           const container = document.getElementById('historyContainer');
           container.innerHTML = '';
@@ -686,7 +700,7 @@
           }
       }
       function triggerNewMonth() {
-          let confirmation = confirm("Voulez-vous clôturer ce mois ? Les cases dépenses seront décochées, l'épargne du mois sera ajoutée au coffre (si pas déjà fait en cochant), et la situation sera figée dans votre Historique.");
+          let confirmation = confirm("Voulez-vous clôturer ce mois ? Les cases dépenses seront décochées, l'épargne du mois sera ajoutée au coffre (si pas déjà fait en cochant), et la situation sera figée dans votre Historique. Les dépenses non-fixes seront supprimées.");
           if(confirmation) {
               let currentSavingsAmount = 0;
               let valSavings = parseFloat(document.getElementById('distSavingsInput').value) || 0;
@@ -709,8 +723,7 @@
               let tempRestantPourPlacements = totalRevenus - (totalExp + baseMargeCA);
               let bAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pBourso) : 0;
               tempRestantPourPlacements -= bAmt;
-              let fAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
-              // Application de la formule corrigée pour l'historique de fin de mois
+              let fAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, fAmt) : 0;
               let rawSavings = totalRevenus - (baseMargeCA + totalExp + bAmt + fAmt);
               if (rawSavings < 0) rawSavings = 0;
               let computedSavings = roundToNearestTenLower(rawSavings);
@@ -727,6 +740,7 @@
               });
               currentMonthWithdrawals = 0;
               monthlySavingsOverride = null;
+              expenses = expenses.filter(e => e.fixed);
               expenses.forEach(e => e.checked = false);
               document.getElementById('checkBourso').checked = false;
               document.getElementById('checkFortuneo').checked = false;
