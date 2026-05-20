@@ -138,6 +138,12 @@
            width: 110px; font-size: 18px; font-weight: 800; color: #248a3d;
            border: 1px solid rgba(52,199,89,0.3); border-radius: 10px; padding: 6px 8px; text-align: right; background: #ffffff;
        }
+       .withdraw-input {
+           width: 80px; font-size: 14px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); text-align: right;
+       }
+       .btn-withdraw {
+           width: auto; padding: 6px 12px; font-size: 13px; background: var(--danger); box-shadow: none; border-radius: 8px;
+       }
        input[type="checkbox"] {
            width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
            background: #fff; cursor: pointer; padding: 0; margin: 0; position: relative; display: inline-block;
@@ -199,18 +205,23 @@
 <label style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Salaire Net Reçu :</label>
 <input type="number" id="salaryInput" placeholder="Saisir salaire" inputmode="decimal" oninput="calculateDistribution()">
 </div>
-<div class="card" style="background: #e9f5ec; border: 1px solid rgba(52,199,89,0.2); padding: 12px 18px;">
-<div style="display: flex; justify-content: space-between; align-items: center;">
+<div class="card" style="background: #e9f5ec; border: 1px solid rgba(52,199,89,0.2); padding: 12px 18px; margin-bottom: 20px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
 <div>
-<div style="display: flex; align-items: center; gap: 8px;">
 <div style="font-size: 14px; font-weight: 700; color: #248a3d;">Coffre Épargne Total</div>
-<button onclick="resetSavingsReference()" style="background: none; border: none; color: #34c759; cursor: pointer; width: auto; padding: 0; box-shadow: none; font-size: 12px;" title="Réinitialiser la référence après une erreur">⚡ Réinitialiser</button>
-</div>
 <div style="font-size: 11px; color: #34c759;" id="savingsSubtext">Modifiable à tout moment</div>
 </div>
 <div style="display: flex; align-items: center; gap: 4px;">
 <input type="number" id="globalSavingsInput" class="savings-input-global" placeholder="0" oninput="updateGlobalSavingsManual()">
 <span style="font-size: 18px; font-weight: 800; color: #248a3d;">€</span>
+</div>
+</div>
+<div style="border-top: 1px dashed rgba(52,199,89,0.2); margin-bottom: 10px;"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+<div style="font-size: 12px; color: #1c1c1e; font-weight: 600;">Montant récupéré de l'épargne :</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+<input type="number" id="withdrawInput" class="withdraw-input" placeholder="0" inputmode="decimal">
+<button onclick="executeWithdraw()" class="btn-withdraw">Valider</button>
 </div>
 </div>
 </div>
@@ -307,7 +318,8 @@
        let plafondBourso = localStorage.getItem('plafondBourso') || 430;
        let plafondFortuneo = localStorage.getItem('plafondFortuneo') || 800;
        let globalSavings = parseFloat(localStorage.getItem('globalSavings')) || 0;
-       let referenceSavings = parseFloat(localStorage.getItem('referenceSavings')) || globalSavings;
+       // Nouvelle variable pour stocker le total cumulé de la désépargne du mois en cours
+       let currentMonthWithdrawals = parseFloat(localStorage.getItem('currentMonthWithdrawals')) || 0;
        let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
        let checkBoursoState = JSON.parse(localStorage.getItem('checkBoursoState')) || false;
        let checkFortuneoState = JSON.parse(localStorage.getItem('checkFortuneoState')) || false;
@@ -319,17 +331,13 @@
        document.getElementById('checkBourso').checked = checkBoursoState;
        document.getElementById('checkFortuneo').checked = checkFortuneoState;
        document.getElementById('checkSavings').checked = checkSavingsState;
-       if (localStorage.getItem('referenceSavings') === null) {
-           localStorage.setItem('referenceSavings', globalSavings);
-           referenceSavings = globalSavings;
-       }
        function saveToLocalStorage() {
            localStorage.setItem('expenses', JSON.stringify(expenses));
            localStorage.setItem('salary', document.getElementById('salaryInput').value);
            localStorage.setItem('plafondBourso', document.getElementById('plafondBourso').value);
            localStorage.setItem('plafondFortuneo', document.getElementById('plafondFortuneo').value);
            localStorage.setItem('globalSavings', globalSavings);
-           localStorage.setItem('referenceSavings', referenceSavings);
+           localStorage.setItem('currentMonthWithdrawals', currentMonthWithdrawals);
            localStorage.setItem('historyLog', JSON.stringify(historyLog));
            localStorage.setItem('checkBoursoState', document.getElementById('checkBourso').checked);
            localStorage.setItem('checkFortuneoState', document.getElementById('checkFortuneo').checked);
@@ -372,19 +380,33 @@
            updateBankStyles();
            calculateDistribution();
        }
-       // CHANGEMENT ICI : On libère la saisie manuelle pour que la référence s'ajuste si on augmente
        function updateGlobalSavingsManual() {
            const val = document.getElementById('globalSavingsInput').value;
            globalSavings = val ? parseFloat(val) : 0;
            saveToLocalStorage();
            calculateDistribution();
        }
-       // CHANGEMENT ICI : Ajout du bouton de reset pour écraser les erreurs de frappe (ex: un zéro en trop)
-       function resetSavingsReference() {
-           referenceSavings = globalSavings;
-           localStorage.setItem('referenceSavings', referenceSavings);
+       // Action de désépargne volontaire
+       function executeWithdraw() {
+           const withdrawField = document.getElementById('withdrawInput');
+           const amountToWithdraw = parseFloat(withdrawField.value) || 0;
+           if (amountToWithdraw <= 0) {
+               alert("Veuillez saisir un montant supérieur à 0 €.");
+               return;
+           }
+           if (amountToWithdraw > globalSavings) {
+               alert("Vous ne pouvez pas récupérer plus d'argent que votre coffre n'en contient !");
+               return;
+           }
+           // Déduction directe du coffre épargne total
+           globalSavings -= amountToWithdraw;
+           // Cumul dans le total de la désépargne effectuée
+           currentMonthWithdrawals += amountToWithdraw;
+           // Mise à jour de l'interface
+           document.getElementById('globalSavingsInput').value = globalSavings;
+           withdrawField.value = ''; // On vide le champ
+           saveToLocalStorage();
            calculateDistribution();
-           alert("La mémoire du coffre a été réinitialisée sur le montant actuel !");
        }
        function roundToFirstDigit(value) {
            if (value <= 0) return 0;
@@ -393,26 +415,23 @@
            let firstDigit = Math.floor(countRound / orderOfMagnitude);
            return firstDigit * orderOfMagnitude;
        }
-       // CHANGEMENT ICI : Logique d'affichage de la désépargne en rouge et en négatif
        function calculateDistribution() {
            const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
            const pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
            const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
-           let cashback = 0;
            const rowCashback = document.getElementById('rowCashback');
            const dashCashback = document.getElementById('dashCashback');
-           if (globalSavings < referenceSavings) {
-               cashback = referenceSavings - globalSavings;
+           // On affiche le montant total récupéré s'il est supérieur à 0
+           if (currentMonthWithdrawals > 0) {
                rowCashback.style.display = 'table';
-               // On force la couleur rouge et le signe moins
-               rowCashback.style.color = 'var(--danger)';
-               dashCashback.innerText = `-${cashback.toFixed(2)} €`;
-               document.getElementById('savingsSubtext').innerText = `Désépargne active de ${cashback}€`;
+               dashCashback.innerText = `-${currentMonthWithdrawals.toFixed(2)} €`;
+               document.getElementById('savingsSubtext').innerText = `Désépargne active de ${currentMonthWithdrawals.toFixed(2)}€`;
            } else {
                rowCashback.style.display = 'none';
                document.getElementById('savingsSubtext').innerText = `Modifiable à tout moment`;
            }
-           let totalAvailableSalary = salaryVal + cashback;
+           // L'argent récupéré s'ajoute au salaire disponible pour couvrir les charges
+           let totalAvailableSalary = salaryVal + currentMonthWithdrawals;
            document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
            let totalExpenses = 0;
            let paidExpenses = 0;
@@ -579,7 +598,8 @@
                    exp: currentExpTotal.toFixed(0),
                    sav: currentSavingsAmount
                });
-               referenceSavings = globalSavings;
+               // On réinitialise la désépargne pour le nouveau mois qui démarre
+               currentMonthWithdrawals = 0;
                expenses.forEach(e => e.checked = false);
                document.getElementById('checkBourso').checked = false;
                document.getElementById('checkFortuneo').checked = false;
@@ -598,7 +618,7 @@
                plafondBourso: document.getElementById('plafondBourso').value,
                plafondFortuneo: document.getElementById('plafondFortuneo').value,
                globalSavings,
-               referenceSavings,
+               currentMonthWithdrawals,
                historyLog
            };
            document.getElementById('ioBuffer').value = btoa(JSON.stringify(dataDump));
@@ -614,7 +634,7 @@
                if (parsed.plafondBourso) document.getElementById('plafondBourso').value = parsed.plafondBourso;
                if (parsed.plafondFortuneo) document.getElementById('plafondFortuneo').value = parsed.plafondFortuneo;
                if (parsed.globalSavings !== undefined) globalSavings = parsed.globalSavings;
-               if (parsed.referenceSavings !== undefined) referenceSavings = parsed.referenceSavings;
+               if (parsed.currentMonthWithdrawals !== undefined) currentMonthWithdrawals = parsed.currentMonthWithdrawals;
                if (parsed.historyLog) historyLog = parsed.historyLog;
                document.getElementById('globalSavingsInput').value = globalSavings;
                saveToLocalStorage();
