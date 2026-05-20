@@ -6,191 +6,163 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mon Budget">
-
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC7uY0DAAAAAXNSR0IArs4c6QAAAExQTFRF////AAAA/wAAzgAA4wAAvwAA0AAAzAAAxwAAwQAAxwAAwAAA0gAAxAAAwwAAxQAAxwAAwAAAxwAAxwAAxgAAwwAAwAAAywAAxQAAxwAA6bZ9YwAAAAV0Uk5T6f39/g8XN9wAAAG1SURBVHja7dvdSgMxEAXgSWu1uSve/vXdTFAvLALCgLOf6ZwzksmZfSshwY0bN27cuOGv0XF9vDzvFz8Vfbeu6m1Xvby8by/bY1Vv66at7vfnY+ZfE6AasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq8EasAasAasBq/FfA94DnoP9F7wHPIecwFvAOeQC3gLOIdfKCTwFnEPunwKvgHPIVf8KeAucQ676V8An4Bxy1b8CfgDPwZ7gM/Ac7Ak+A6+Bc8gpvAbOIafwGjgH+y8EToFzSOAk4BQ4hwROAU6Bc0jgFOD0C5zAOdiTfIETOAepvS7wAU7vI7gA6V0EFyC9A9wAnwAnwCcgXIDwP3gDwt8AnwAnwCcgXIDw7YIInwXwWbAgwGcBfBYsCPBZAMmNGzdu3Lhx43O8AcNnLwUasvshAAAAAElFTkSuQmCC">
-
 <title>Mon Budget Master Pro</title>
 <style>
-       :root {
-           --bg-color: #f2f2f7;
-           --card-bg: #ffffff;
-           --text-color: #1c1c1e;
-           --text-secondary: #8e8e93;
-           --primary: #007aff;
-           --danger: #ff3b30;
-           --success: #34c759;
-           --warning: #ff9500;
-           --border: #e5e5ea;
-           --accent-gradient: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
-       }
-
-       * { box-sizing: border-box; }
-
-       body {
-           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-           background-color: var(--bg-color);
-           color: var(--text-color);
-           margin: 0;
-           padding: env(safe-area-inset-top) 16px 60px 16px;
-           -webkit-tap-highlight-color: transparent;
-       }
-
-       h1 {
-           font-size: 28px;
-           font-weight: 800;
-           margin: 24px 0 16px 0;
-           letter-spacing: -0.5px;
-       }
-
-       h2 {
-           font-size: 13px;
-           font-weight: 700;
-           margin: 28px 0 12px 4px;
-           text-transform: uppercase;
-           letter-spacing: 0.5px;
-           color: var(--text-secondary);
-       }
-
-       .card {
-           background: var(--card-bg);
-           border-radius: 24px;
-           padding: 20px;
-           box-shadow: 0 8px 24px rgba(0,0,0,0.04);
-           margin-bottom: 20px;
-           border: 1px solid rgba(0, 0, 0, 0.02);
-       }
-
-       .main-dash {
-           background: var(--accent-gradient);
-           color: white;
-       }
-
-       .balance-row {
-           display: flex;
-           justify-content: space-between;
-           margin-bottom: 12px;
-           font-size: 15px;
-       }
-       .balance-cell-left { opacity: 0.9; }
-       .balance-cell-right { font-variant-numeric: tabular-nums; font-weight: 500; }
-
-       .balance-row.total {
-           margin-bottom: 0;
-           padding-top: 14px;
-           border-top: 1px solid rgba(255,255,255,0.15);
-           font-weight: 700;
-           font-size: 18px;
-           letter-spacing: -0.3px;
-       }
-
-       .progress-container {
-           margin-top: 14px;
-           background: rgba(255, 255, 255, 0.15);
-           border-radius: 6px;
-           height: 6px;
-           overflow: hidden;
-       }
-       .progress-bar {
-           background: var(--success);
-           height: 100%;
-           width: 0%;
-           transition: width 0.3s ease;
-       }
-
-       .text-danger { color: var(--danger); }
-       .text-success { color: var(--success); }
-
-       input, button, textarea {
-           font-size: 16px;
-           padding: 14px;
-           border: 1px solid var(--border);
-           border-radius: 14px;
-           outline: none;
-           width: 100%;
-           background: var(--card-bg);
-           -webkit-appearance: none;
-       }
-       input:focus { border-color: var(--primary); }
-
-       button {
-           background: var(--primary);
-           color: white;
-           border: none;
-           font-weight: 600;
-           cursor: pointer;
-           text-align: center;
-       }
-       button:active { opacity: 0.8; }
-
-       .btn-reset {
-           background: #fff;
-           color: var(--danger);
-           border: 1px solid var(--border);
-           margin-top: 5px;
-       }
-
-       .bank-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
-       .bank-item:last-child { border-bottom: none; }
-       .bank-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-       .bank-name-block { display: flex; align-items: center; gap: 12px; }
-       .bank-title { font-weight: 600; font-size: 16px; }
-       .bank-amount { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
-       .bank-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); padding-left: 34px; flex-wrap: wrap; gap: 8px; }
-
-       .plafond-input, .marge-input, .aides-input { width: 65px; padding: 5px 6px; font-size: 13px; border-radius: 8px; text-align: center; display: inline-block; border: 1px solid var(--border); }
-       .marge-input { font-weight: bold; color: var(--primary); }
-       .aides-input { font-weight: bold; color: #5856d6; }
-
-       .savings-input-global {
-           width: 110px; font-size: 20px; font-weight: 800; color: #248a3d;
-           border: 1px solid rgba(52,199,89,0.2); border-radius: 10px; padding: 6px 8px; text-align: right; background: #ffffff;
-       }
-
-       .withdraw-input { width: 70px; font-size: 14px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); text-align: right; }
-       .btn-withdraw { width: auto; padding: 6px 12px; font-size: 13px; background: var(--primary); border-radius: 8px; }
-       .btn-withdraw-reset { width: auto; padding: 6px 12px; font-size: 13px; background: #fff; color: var(--danger); border: 1px solid var(--border); border-radius: 8px; }
-
-       input[type="checkbox"] {
-           width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
-           background: #fff; cursor: pointer; padding: 0; margin: 0; position: relative; display: inline-block;
-       }
-       input[type="checkbox"]:checked { background-color: var(--success); border-color: var(--success); }
-       input[type="checkbox"]:checked::after {
-           content: ''; position: absolute; left: 8px; top: 4px; width: 5px; height: 10px;
-           border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
-       }
-
-       .list-container { background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
-       .item-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
-       .item-row:last-child { border-bottom: none; }
-       .item-left { display: flex; align-items: center; gap: 8px; flex: 1; }
-
-       .checked-text { text-decoration: line-through; color: var(--text-secondary); opacity: 0.6; }
-       .date-badge { font-size: 11px; color: var(--text-secondary); background: var(--bg-color); padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
-
-       .move-buttons { display: flex; flex-direction: column; gap: 2px; margin-right: 4px; }
-       .move-btn { background: none; border: none; color: #aeaea3; padding: 0; font-size: 11px; width: 16px; height: 14px; }
-
-       .action-btn { background: none; color: #aeaea3; border: none; padding: 0 6px; font-size: 15px; width: auto; }
-       .action-btn:active { color: var(--primary); }
-
-       .form-layout { display: flex; gap: 6px; margin-bottom: 10px; }
-
-       .history-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-       .history-item:last-child { border-bottom: none; }
-       .history-left { flex: 1; }
-       .history-date { font-weight: 700; color: var(--text-color); margin-bottom: 4px; }
-       .history-details { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 12px; padding-right: 8px; }
+       :root {
+           --bg-color: #f2f2f7;
+           --card-bg: #ffffff;
+           --text-color: #1c1c1e;
+           --text-secondary: #8e8e93;
+           --primary: #007aff;
+           --danger: #ff3b30;
+           --success: #34c759;
+           --warning: #ff9500;
+           --border: #e5e5ea;
+           --accent-gradient: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+       }
+       * { box-sizing: border-box; }
+       body {
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+           background-color: var(--bg-color);
+           color: var(--text-color);
+           margin: 0;
+           padding: env(safe-area-inset-top) 16px 60px 16px;
+           -webkit-tap-highlight-color: transparent;
+       }
+       h1 {
+           font-size: 28px;
+           font-weight: 800;
+           margin: 24px 0 16px 0;
+           letter-spacing: -0.5px;
+       }
+       h2 {
+           font-size: 13px;
+           font-weight: 700;
+           margin: 28px 0 12px 4px;
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+           color: var(--text-secondary);
+       }
+       .card {
+           background: var(--card-bg);
+           border-radius: 24px;
+           padding: 20px;
+           box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+           margin-bottom: 20px;
+           border: 1px solid rgba(0, 0, 0, 0.02);
+       }
+       .main-dash {
+           background: var(--accent-gradient);
+           color: white;
+       }
+       .balance-row {
+           display: flex;
+           justify-content: space-between;
+           margin-bottom: 12px;
+           font-size: 15px;
+       }
+       .balance-cell-left { opacity: 0.9; }
+       .balance-cell-right { font-variant-numeric: tabular-nums; font-weight: 500; }
+       .balance-row.total {
+           margin-bottom: 0;
+           padding-top: 14px;
+           border-top: 1px solid rgba(255,255,255,0.15);
+           font-weight: 700;
+           font-size: 18px;
+           letter-spacing: -0.3px;
+       }
+       .progress-container {
+           margin-top: 14px;
+           background: rgba(255, 255, 255, 0.15);
+           border-radius: 6px;
+           height: 6px;
+           overflow: hidden;
+       }
+       .progress-bar {
+           background: var(--success);
+           height: 100%;
+           width: 0%;
+           transition: width 0.3s ease;
+       }
+       .text-danger { color: var(--danger); }
+       .text-success { color: var(--success); }
+       input, button, textarea {
+           font-size: 16px;
+           padding: 14px;
+           border: 1px solid var(--border);
+           border-radius: 14px;
+           outline: none;
+           width: 100%;
+           background: var(--card-bg);
+           -webkit-appearance: none;
+       }
+       input:focus { border-color: var(--primary); }
+       button {
+           background: var(--primary);
+           color: white;
+           border: none;
+           font-weight: 600;
+           cursor: pointer;
+           text-align: center;
+       }
+       button:active { opacity: 0.8; }
+       .btn-reset {
+           background: #fff;
+           color: var(--danger);
+           border: 1px solid var(--border);
+           margin-top: 5px;
+       }
+       .bank-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+       .bank-item:last-child { border-bottom: none; }
+       .bank-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+       .bank-name-block { display: flex; align-items: center; gap: 12px; }
+       .bank-title { font-weight: 600; font-size: 16px; }
+       .bank-amount { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+       .bank-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); padding-left: 34px; flex-wrap: wrap; gap: 8px; }
+       .plafond-input, .marge-input, .aides-input { width: 65px; padding: 5px 6px; font-size: 13px; border-radius: 8px; text-align: center; display: inline-block; border: 1px solid var(--border); }
+       .marge-input { font-weight: bold; color: var(--primary); }
+       .aides-input { font-weight: bold; color: #5856d6; }
+       .savings-input-global {
+           width: 110px; font-size: 20px; font-weight: 800; color: #248a3d;
+           border: 1px solid rgba(52,199,89,0.2); border-radius: 10px; padding: 6px 8px; text-align: right; background: #ffffff;
+       }
+       .withdraw-input { width: 70px; font-size: 14px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); text-align: right; }
+       .btn-withdraw { width: auto; padding: 6px 12px; font-size: 13px; background: var(--primary); border-radius: 8px; }
+       .btn-withdraw-reset { width: auto; padding: 6px 12px; font-size: 13px; background: #fff; color: var(--danger); border: 1px solid var(--border); border-radius: 8px; }
+       input[type="checkbox"] {
+           width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
+           background: #fff; cursor: pointer; padding: 0; margin: 0; position: relative; display: inline-block;
+       }
+       input[type="checkbox"]:checked { background-color: var(--success); border-color: var(--success); }
+       input[type="checkbox"]:checked::after {
+           content: ''; position: absolute; left: 8px; top: 4px; width: 5px; height: 10px;
+           border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+       }
+       .list-container { background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
+       .item-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+       .item-row:last-child { border-bottom: none; }
+       .item-left { display: flex; align-items: center; gap: 8px; flex: 1; }
+       .checked-text { text-decoration: line-through; color: var(--text-secondary); opacity: 0.6; }
+       .date-badge { font-size: 11px; color: var(--text-secondary); background: var(--bg-color); padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
+       .move-buttons { display: flex; flex-direction: column; gap: 2px; margin-right: 4px; }
+       .move-btn { background: none; border: none; color: #aeaea3; padding: 0; font-size: 11px; width: 16px; height: 14px; }
+       .action-btn { background: none; color: #aeaea3; border: none; padding: 0 6px; font-size: 15px; width: auto; }
+       .action-btn:active { color: var(--primary); }
+       .form-layout { display: flex; gap: 6px; margin-bottom: 10px; }
+       .history-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+       .history-item:last-child { border-bottom: none; }
+       .history-left { flex: 1; }
+       .history-date { font-weight: 700; color: var(--text-color); margin-bottom: 4px; }
+       .history-details { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 12px; padding-right: 8px; }
 </style>
 </head>
 <body>
-
 <h1>Mon Budget</h1>
-
 <h2>Flux Mensuel</h2>
 <div class="card main-dash">
 <div class="balance-row">
-<div class="balance-cell-left">Salaire mensuel :</div>
+<div class="balance-cell-left">Salaire + Aides :</div>
 <div class="balance-cell-right" id="dashSalary">0,00 €</div>
 </div>
 <div class="balance-row" style="color: #34c759; font-weight: bold;">
@@ -209,12 +181,10 @@
 <div class="progress-bar" id="progressBar"></div>
 </div>
 </div>
-
 <div class="card" style="padding: 14px 20px;">
 <label style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase;">Salaire Net Reçu :</label>
 <input type="number" id="salaryInput" placeholder="Saisir salaire" inputmode="decimal" oninput="handleSalaryInput()">
 </div>
-
 <div class="card" style="background: #e9f5ec; border: 1px solid rgba(52,199,89,0.15); padding: 16px 20px;">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
 <div>
@@ -226,9 +196,7 @@
 <span style="font-size: 18px; font-weight: 800; color: #248a3d;">€</span>
 </div>
 </div>
-
 <div style="border-top: 1px dashed rgba(52,199,89,0.2); margin-bottom: 12px;"></div>
-
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
 <div style="font-size: 13px; color: #1c1c1e; font-weight: 600;">Désépargner :</div>
 <div style="display: flex; align-items: center; gap: 4px;">
@@ -238,7 +206,6 @@
 </div>
 </div>
 </div>
-
 <h2>Plan de répartition & Virements</h2>
 <div class="card" style="padding-top: 4px; padding-bottom: 4px;">
 <div class="bank-item">
@@ -255,7 +222,6 @@
 <span>Aides : <input type="number" id="aidesSocialesInput" class="aides-input" value="0" oninput="calculateDistribution()"> €</span>
 </div>
 </div>
-
 <div class="bank-item">
 <div class="bank-top">
 <div class="bank-name-block">
@@ -269,7 +235,6 @@
 <span id="statusBourso">À transférer</span>
 </div>
 </div>
-
 <div class="bank-item">
 <div class="bank-top">
 <div class="bank-name-block">
@@ -283,7 +248,6 @@
 <span id="statusFortuneo">À transférer</span>
 </div>
 </div>
-
 <div class="bank-item" style="border-bottom: none;">
 <div class="bank-top">
 <div class="bank-name-block">
@@ -298,7 +262,6 @@
 </div>
 </div>
 </div>
-
 <h2 id="formExpenseTitle">Nouvelle dépense</h2>
 <div class="form-layout">
 <input type="hidden" id="editIndex" value="-1">
@@ -310,19 +273,15 @@
 <div id="cancelEditBox" style="display:none; text-align:right; margin-bottom:12px; font-size:13px;">
 <a href="#" onclick="cancelEdit()" style="color:var(--danger); text-decoration:none;">Annuler la modification</a>
 </div>
-
 <div style="display: flex; justify-content: space-between; align-items: center;">
 <h2>Liste des dépenses</h2>
 <span id="totalExpensesDisplay" style="font-size: 14px; font-weight: 700; color: var(--text-secondary); margin-right: 4px;">Total : 0,00 €</span>
 </div>
 <div class="list-container" id="expenseList"></div>
-
 <button class="btn-reset" onclick="triggerNewMonth()">🔄 Commencer un Nouveau Mois</button>
-
 <h2>Historique des mois passés</h2>
 <div class="card" id="historyContainer" style="max-height: 200px; overflow-y: auto; padding-top: 4px; padding-bottom: 4px;"></div>
-
-<h2>Sauvegarde Système (Import / Export)</h2>
+<h2>Sauvegarde Système</h2>
 <div class="card" style="padding: 14px 20px;">
 <div style="display: flex; gap: 8px; margin-bottom: 10px;">
 <button onclick="exportData()" style="background:#8e8e93; font-size:13px; padding:10px;">📤 Exporter</button>
@@ -330,64 +289,54 @@
 </div>
 <textarea id="ioBuffer" placeholder="Le code de sauvegarde s'affichera ici..." style="font-size:11px; height:60px; font-family:monospace; resize:none; color:var(--text-secondary);"></textarea>
 </div>
-
 <script>
-       let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
-       let salary = localStorage.getItem('salary') || '';
-       let plafondBourso = localStorage.getItem('plafondBourso') || 430;
-       let plafondFortuneo = localStorage.getItem('plafondFortuneo') || 800;
-       let margeCA = localStorage.getItem('margeCA') || 50;
-       let aidesSociales = localStorage.getItem('aidesSociales') || 0;
-       let globalSavings = parseFloat(localStorage.getItem('globalSavings')) || 0;
-       let monthlySavingsOverride = localStorage.getItem('monthlySavingsOverride') || null;
-
-       let currentMonthWithdrawals = parseFloat(localStorage.getItem('currentMonthWithdrawals')) || 0;
-       let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
-
-       let checkBoursoState = JSON.parse(localStorage.getItem('checkBoursoState')) || false;
-       let checkFortuneoState = JSON.parse(localStorage.getItem('checkFortuneoState')) || false;
-       let checkSavingsState = JSON.parse(localStorage.getItem('checkSavingsState')) || false;
-
-       document.getElementById('salaryInput').value = salary;
-       document.getElementById('plafondBourso').value = plafondBourso;
-       document.getElementById('plafondFortuneo').value = plafondFortuneo;
-       document.getElementById('margeCA').value = margeCA;
-       document.getElementById('aidesSocialesInput').value = aidesSociales;
-       document.getElementById('globalSavingsInput').value = globalSavings;
-       document.getElementById('checkBourso').checked = checkBoursoState;
-       document.getElementById('checkFortuneo').checked = checkFortuneoState;
-       document.getElementById('checkSavings').checked = checkSavingsState;
-
-       function saveToLocalStorage() {
-           localStorage.setItem('expenses', JSON.stringify(expenses));
-           localStorage.setItem('salary', document.getElementById('salaryInput').value);
-           localStorage.setItem('plafondBourso', document.getElementById('plafondBourso').value);
-           localStorage.setItem('plafondFortuneo', document.getElementById('plafondFortuneo').value);
-           localStorage.setItem('margeCA', document.getElementById('margeCA').value);
-           localStorage.setItem('aidesSociales', document.getElementById('aidesSocialesInput').value);
-           localStorage.setItem('globalSavings', globalSavings);
-           localStorage.setItem('monthlySavingsOverride', monthlySavingsOverride !== null ? monthlySavingsOverride : '');
-           localStorage.setItem('currentMonthWithdrawals', currentMonthWithdrawals);
-           localStorage.setItem('historyLog', JSON.stringify(historyLog));
-           localStorage.setItem('checkBoursoState', document.getElementById('checkBourso').checked);
-           localStorage.setItem('checkFortuneoState', document.getElementById('checkFortuneo').checked);
-           localStorage.setItem('checkSavingsState', document.getElementById('checkSavings').checked);
-       }
-
-       function render() {
-           const list = document.getElementById('expenseList');
-           list.innerHTML = '';
-           let total = 0;
-
-           if(expenses.length === 0) {
-               list.innerHTML = '<div class="item-row" style="color: var(--text-secondary); justify-content: center; font-size: 14px;">Aucune dépense enregistrée</div>';
-           }
-
-           expenses.forEach((expense, index) => {
-               total += expense.amount;
-               const row = document.createElement('div');
-               row.className = 'item-row';
-               row.innerHTML = `
+       let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+       let salary = localStorage.getItem('salary') || '';
+       let plafondBourso = localStorage.getItem('plafondBourso') || 430;
+       let plafondFortuneo = localStorage.getItem('plafondFortuneo') || 800;
+       let margeCA = localStorage.getItem('margeCA') || 50;
+       let aidesSociales = localStorage.getItem('aidesSociales') || 0;
+       let globalSavings = parseFloat(localStorage.getItem('globalSavings')) || 0;
+       let currentMonthWithdrawals = parseFloat(localStorage.getItem('currentMonthWithdrawals')) || 0;
+       let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
+       let checkBoursoState = JSON.parse(localStorage.getItem('checkBoursoState')) || false;
+       let checkFortuneoState = JSON.parse(localStorage.getItem('checkFortuneoState')) || false;
+       let checkSavingsState = JSON.parse(localStorage.getItem('checkSavingsState')) || false;
+       document.getElementById('salaryInput').value = salary;
+       document.getElementById('plafondBourso').value = plafondBourso;
+       document.getElementById('plafondFortuneo').value = plafondFortuneo;
+       document.getElementById('margeCA').value = margeCA;
+       document.getElementById('aidesSocialesInput').value = aidesSociales;
+       document.getElementById('globalSavingsInput').value = globalSavings;
+       document.getElementById('checkBourso').checked = checkBoursoState;
+       document.getElementById('checkFortuneo').checked = checkFortuneoState;
+       document.getElementById('checkSavings').checked = checkSavingsState;
+       function saveToLocalStorage() {
+           localStorage.setItem('expenses', JSON.stringify(expenses));
+           localStorage.setItem('salary', document.getElementById('salaryInput').value);
+           localStorage.setItem('plafondBourso', document.getElementById('plafondBourso').value);
+           localStorage.setItem('plafondFortuneo', document.getElementById('plafondFortuneo').value);
+           localStorage.setItem('margeCA', document.getElementById('margeCA').value);
+           localStorage.setItem('aidesSociales', document.getElementById('aidesSocialesInput').value);
+           localStorage.setItem('globalSavings', globalSavings);
+           localStorage.setItem('currentMonthWithdrawals', currentMonthWithdrawals);
+           localStorage.setItem('historyLog', JSON.stringify(historyLog));
+           localStorage.setItem('checkBoursoState', document.getElementById('checkBourso').checked);
+           localStorage.setItem('checkFortuneoState', document.getElementById('checkFortuneo').checked);
+           localStorage.setItem('checkSavingsState', document.getElementById('checkSavings').checked);
+       }
+       function render() {
+           const list = document.getElementById('expenseList');
+           list.innerHTML = '';
+           let total = 0;
+           if(expenses.length === 0) {
+               list.innerHTML = '<div class="item-row" style="color: var(--text-secondary); justify-content: center; font-size: 14px;">Aucune dépense enregistrée</div>';
+           }
+           expenses.forEach((expense, index) => {
+               total += expense.amount;
+               const row = document.createElement('div');
+               row.className = 'item-row';
+               row.innerHTML = `
 <div class="item-left">
 <div class="move-buttons">
 <button class="move-btn" onclick="moveItem(${index}, -1)">▲</button>
@@ -395,7 +344,7 @@
 </div>
 <input type="checkbox" ${expense.checked ? 'checked' : ''} onchange="toggleCheck(${index})">
 <span class="${expense.checked ? 'checked-text' : ''}">
-                           ${expense.name} ${expense.date ? `<span class="date-badge">${expense.date}</span>` : ''}
+                           ${expense.name} ${expense.date ? `<span class="date-badge">${expense.date}</span>` : ''}
 </span>
 </div>
 <div style="display: flex; align-items: center; gap:4px;">
@@ -403,306 +352,239 @@
 <button class="action-btn" onclick="editExpense(${index})">✏️</button>
 <button class="action-btn" onclick="deleteExpense(${index})">✕</button>
 </div>
-               `;
-               list.appendChild(row);
-           });
-
-           document.getElementById('totalExpensesDisplay').innerText = `Total : ${total.toFixed(2)} €`;
-
-           renderHistory();
-           updateBankStyles();
-           calculateDistribution();
-       }
-
-       function updateGlobalSavingsManual() {
-           const val = document.getElementById('globalSavingsInput').value;
-           globalSavings = val ? parseFloat(val) : 0;
-           saveToLocalStorage();
-           calculateDistribution();
-       }
-
-       function handleSalaryInput() {
-           monthlySavingsOverride = null;
-           calculateDistribution();
-       }
-
-       function executeWithdraw() {
-           const withdrawField = document.getElementById('withdrawInput');
-           const amountToWithdraw = parseFloat(withdrawField.value) || 0;
-
-           if (amountToWithdraw <= 0) return;
-           if (amountToWithdraw > globalSavings) {
-               alert("Fonds insuffisants dans le coffre !");
-               return;
-           }
-
-           globalSavings -= amountToWithdraw;
-           currentMonthWithdrawals += amountToWithdraw;
-           document.getElementById('globalSavingsInput').value = globalSavings;
-           withdrawField.value = '';
-
-           saveToLocalStorage();
-           calculateDistribution();
-       }
-
-       function resetWithdraw() {
-           if(currentMonthWithdrawals > 0) {
-               globalSavings += currentMonthWithdrawals;
-               currentMonthWithdrawals = 0;
-               document.getElementById('globalSavingsInput').value = globalSavings;
-               saveToLocalStorage();
-               calculateDistribution();
-           }
-       }
-
-       function calculateDistribution() {
-           const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
-           const pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
-           const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
-           const baseMargeCA = parseFloat(document.getElementById('margeCA').value) || 0;
-           const aidesSocialesVal = parseFloat(document.getElementById('aidesSocialesInput').value) || 0;
-
-           let totalExpenses = 0;
-           let paidExpenses = 0;
-           expenses.forEach(e => {
-               totalExpenses += e.amount;
-               if(e.checked) paidExpenses += e.amount;
-           });
-
-           let resteAPayer = totalExpenses - paidExpenses;
-           let totalRevenus = salaryVal + aidesSocialesVal;
-
-           // Placement cascades basés sur les plafonds
-           let tempRestant = totalRevenus - (totalExpenses + baseMargeCA);
-           let boursoAmount = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
-           tempRestant -= boursoAmount;
-           let fortuneoAmount = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
-
-           // Formule Demandée : (Salaire net reçu + aides sociales) - (total listes dépensé + boursorama + fortuneo + marge de sécurité CA)
-           let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount + baseMargeCA);
-           if (rawSavings < 0) rawSavings = 0;
-
-           // Arrondi à la dizaine inférieure
-           let computedSavings = Math.floor(rawSavings / 10) * 10;
-           let savingsAmount = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
-
-           // Le reliquat de l'arrondi retourne sécuriser le CA
-           let perteArrondi = rawSavings - savingsAmount;
-           let finalMargeCA = baseMargeCA + perteArrondi;
-
-           let caAmount = salaryVal > 0 ? (resteAPayer + finalMargeCA) : 0;
-
-           document.getElementById('distCA').innerText = `${caAmount.toFixed(2)} €`;
-           document.getElementById('formulaCA').innerText = `Reste des charges (${resteAPayer.toFixed(2)}€) + ${finalMargeCA.toFixed(2)}€`;
-           document.getElementById('distBourso').innerText = `${boursoAmount.toFixed(2)} €`;
-           document.getElementById('distFortuneo').innerText = `${fortuneoAmount.toFixed(2)} €`;
-           document.getElementById('distSavingsText').innerText = `${savingsAmount.toFixed(2)} €`;
-           document.getElementById('savingsArrondiLabel').innerText = `Arrondi appliqué (-${perteArrondi.toFixed(2)}€)`;
-
-           // Calcul du Reste à Vivre Réel du Dashboard Sombre
-           let placementsValides = 0;
-           if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
-           if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
-           if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
-
-           let resteAVivreReel = (salaryVal + currentMonthWithdrawals) - totalExpenses - placementsValides;
-
-           document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
-           document.getElementById('dashWithdrawals').innerText = `+${currentMonthWithdrawals.toFixed(2)} €`;
-           document.getElementById('dashTotalExpenses').innerText = `${totalExpenses.toFixed(2)} €`;
-           document.getElementById('dashResteAVivre').innerText = `${resteAVivreReel.toFixed(2)} €`;
-
-           const bar = document.getElementById('progressBar');
-           let totalRessources = salaryVal + currentMonthWithdrawals;
-           if (totalRessources > 0) {
-               let pct = (resteAVivreReel / totalRessources) * 100;
-               bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-           } else { bar.style.width = '0%'; }
-
-           if (currentMonthWithdrawals > 0) {
-               document.getElementById('savingsSubtext').innerText = `Désépargne active de ${currentMonthWithdrawals.toFixed(2)}€`;
-           } else {
-               document.getElementById('savingsSubtext').innerText = `Modifiable à tout moment`;
-           }
-
-           saveToLocalStorage();
-       }
-
-       function saveExpense() {
-           const nameInput = document.getElementById('expenseName');
-           const amountInput = document.getElementById('expenseAmount');
-           const dateInput = document.getElementById('expenseDate');
-           const editIndex = parseInt(document.getElementById('editIndex').value);
-
-           const name = nameInput.value.trim();
-           const amount = parseFloat(amountInput.value);
-           const date = dateInput.value.trim();
-
-           if (name && !isNaN(amount) && amount > 0) {
-               if(editIndex === -1) {
-                   expenses.push({ name, amount, date, checked: false });
-               } else {
-                   expenses[editIndex].name = name;
-                   expenses[editIndex].amount = amount;
-                   expenses[editIndex].date = date;
-                   cancelEdit();
-               }
-               nameInput.value = ''; amountInput.value = ''; dateInput.value = '';
-               saveToLocalStorage();
-               render();
-           }
-       }
-
-       function editExpense(index) {
-           document.getElementById('formExpenseTitle').innerText = "Modifier la dépense ✏️";
-           document.getElementById('expenseName').value = expenses[index].name;
-           document.getElementById('expenseAmount').value = expenses[index].amount;
-           document.getElementById('expenseDate').value = expenses[index].date || '';
-           document.getElementById('editIndex').value = index;
-           document.getElementById('btnSubmitExpense').innerText = "OK";
-           document.getElementById('cancelEditBox').style.display = 'block';
-       }
-
-       function cancelEdit() {
-           document.getElementById('formExpenseTitle').innerText = "Nouvelle dépense";
-           document.getElementById('expenseName').value = '';
-           document.getElementById('expenseAmount').value = '';
-           document.getElementById('expenseDate').value = '';
-           document.getElementById('editIndex').value = "-1";
-           document.getElementById('btnSubmitExpense').innerText = "+";
-           document.getElementById('cancelEditBox').style.display = 'none';
-       }
-
-       function moveItem(index, direction) {
-           let targetIndex = index + direction;
-           if (targetIndex >= 0 && targetIndex < expenses.length) {
-               let temp = expenses[index];
-               expenses[index] = expenses[targetIndex];
-               expenses[targetIndex] = temp;
-               saveToLocalStorage();
-               render();
-           }
-       }
-
-       function toggleBankCheck() { updateBankStyles(); calculateDistribution(); }
-
-       function toggleSavingsCheck() {
-           const isChecked = document.getElementById('checkSavings').checked;
-           let valSavings = parseFloat(document.getElementById('distSavingsText').innerText) || 0;
-
-           if (isChecked) {
-               globalSavings += valSavings;
-           } else {
-               globalSavings -= valSavings;
-           }
-
-           document.getElementById('globalSavingsInput').value = globalSavings;
-           updateBankStyles();
-           calculateDistribution();
-       }
-
-       function updateBankStyles() {
-           const boursorCheck = document.getElementById('checkBourso').checked;
-           const fortCheck = document.getElementById('checkFortuneo').checked;
-           const saveCheck = document.getElementById('checkSavings').checked;
-
-           document.getElementById('titleBourso').className = boursorCheck ? 'bank-title checked-text' : 'bank-title';
-           document.getElementById('statusBourso').innerText = boursorCheck ? 'Transféré ✓' : 'À transférer';
-           document.getElementById('statusBourso').style.color = boursorCheck ? 'var(--success)' : 'var(--text-secondary)';
-
-           document.getElementById('titleFortuneo').className = fortCheck ? 'bank-title checked-text' : 'bank-title';
-           document.getElementById('statusFortuneo').innerText = fortCheck ? 'Transféré ✓' : 'À transférer';
-           document.getElementById('statusFortuneo').style.color = fortCheck ? 'var(--success)' : 'var(--text-secondary)';
-
-           document.getElementById('titleSavings').className = saveCheck ? 'bank-title checked-text' : 'bank-title';
-           document.getElementById('statusSavings').innerText = saveCheck ? 'Transféré ✓' : 'À transférer';
-           document.getElementById('statusSavings').style.color = saveCheck ? 'var(--success)' : 'var(--text-secondary)';
-       }
-
-       function toggleCheck(index) { expenses[index].checked = !expenses[index].checked; saveToLocalStorage(); render(); }
-       function deleteExpense(index) { expenses.splice(index, 1); saveToLocalStorage(); render(); }
-
-       function renderHistory() {
-           const container = document.getElementById('historyContainer');
-           container.innerHTML = '';
-           if(historyLog.length === 0) {
-               container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:10px; font-size:13px;">Aucun mois clôturé.</div>';
-               return;
-           }
-           for(let i = historyLog.length - 1; i >= 0; i--) {
-               const log = historyLog[i];
-               const row = document.createElement('div');
-               row.className = 'history-item';
-               row.innerHTML = `
+               `;
+               list.appendChild(row);
+           });
+           document.getElementById('totalExpensesDisplay').innerText = `Total : ${total.toFixed(2)} €`;
+           renderHistory();
+           updateBankStyles();
+           calculateDistribution();
+       }
+       function updateGlobalSavingsManual() {
+           const val = document.getElementById('globalSavingsInput').value;
+           globalSavings = val ? parseFloat(val) : 0;
+           saveToLocalStorage();
+           calculateDistribution();
+       }
+       function handleSalaryInput() { calculateDistribution(); }
+       function executeWithdraw() {
+           const withdrawField = document.getElementById('withdrawInput');
+           const amountToWithdraw = parseFloat(withdrawField.value) || 0;
+           if (amountToWithdraw <= 0) return;
+           if (amountToWithdraw > globalSavings) { alert("Fonds insuffisants !"); return; }
+           globalSavings -= amountToWithdraw;
+           currentMonthWithdrawals += amountToWithdraw;
+           document.getElementById('globalSavingsInput').value = globalSavings;
+           withdrawField.value = '';
+           saveToLocalStorage();
+           calculateDistribution();
+       }
+       function resetWithdraw() {
+           if(currentMonthWithdrawals > 0) {
+               globalSavings += currentMonthWithdrawals;
+               currentMonthWithdrawals = 0;
+               document.getElementById('globalSavingsInput').value = globalSavings;
+               saveToLocalStorage();
+               calculateDistribution();
+           }
+       }
+       function calculateDistribution() {
+           const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
+           const pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
+           const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
+           const baseMargeCA = parseFloat(document.getElementById('margeCA').value) || 0;
+           const aidesSocialesVal = parseFloat(document.getElementById('aidesSocialesInput').value) || 0;
+           let totalExpenses = 0;
+           let paidExpenses = 0;
+           expenses.forEach(e => {
+               totalExpenses += e.amount;
+               if(e.checked) paidExpenses += e.amount;
+           });
+           let resteAPayer = totalExpenses - paidExpenses;
+           let totalRevenus = salaryVal + aidesSocialesVal;
+           // Logique de cascade basée sur les plafonds restants
+           let tempRestant = totalRevenus - (totalExpenses + baseMargeCA);
+           let boursoAmount = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
+           tempRestant -= boursoAmount;
+           let fortuneoAmount = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
+           // Formule exacte demandée : (Salaire + Aides) - (Dépenses + Bourso + Fortu + Marge)
+           let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount + baseMargeCA);
+           if (rawSavings < 0) rawSavings = 0;
+           // Arrondi appliqué à la dizaine inférieure
+           let savingsAmount = Math.floor(rawSavings / 10) * 10;
+           let perteArrondi = rawSavings - savingsAmount;
+           // Crédit Agricole récupère la base + le reste à payer + la perte de l'arrondi
+           let finalMargeCA = baseMargeCA + perteArrondi;
+           let caAmount = salaryVal > 0 ? (resteAPayer + finalMargeCA) : 0;
+           document.getElementById('distCA').innerText = `${caAmount.toFixed(2)} €`;
+           document.getElementById('formulaCA').innerText = `Reste des charges (${resteAPayer.toFixed(2)}€) + Marge (${finalMargeCA.toFixed(2)}€)`;
+           document.getElementById('distBourso').innerText = `${boursoAmount.toFixed(2)} €`;
+           document.getElementById('distFortuneo').innerText = `${fortuneoAmount.toFixed(2)} €`;
+           document.getElementById('distSavingsText').innerText = `${savingsAmount.toFixed(2)} €`;
+           document.getElementById('savingsArrondiLabel').innerText = `Arrondi appliqué (-${perteArrondi.toFixed(2)}€)`;
+           // Reste à vivre réel (Dashboard)
+           let placementsValides = 0;
+           if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
+           if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
+           if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
+           let resteAVivreReel = (totalRevenus + currentMonthWithdrawals) - totalExpenses - placementsValides;
+           document.getElementById('dashSalary').innerText = `${totalRevenus.toFixed(2)} €`;
+           document.getElementById('dashWithdrawals').innerText = `+${currentMonthWithdrawals.toFixed(2)} €`;
+           document.getElementById('dashTotalExpenses').innerText = `${totalExpenses.toFixed(2)} €`;
+           document.getElementById('dashResteAVivre').innerText = `${resteAVivreReel.toFixed(2)} €`;
+           const bar = document.getElementById('progressBar');
+           let totalRessources = totalRevenus + currentMonthWithdrawals;
+           if (totalRessources > 0) {
+               let pct = (resteAVivreReel / totalRessources) * 100;
+               bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+           } else { bar.style.width = '0%'; }
+           saveToLocalStorage();
+       }
+       function saveExpense() {
+           const nameInput = document.getElementById('expenseName');
+           const amountInput = document.getElementById('expenseAmount');
+           const dateInput = document.getElementById('expenseDate');
+           const editIndex = parseInt(document.getElementById('editIndex').value);
+           const name = nameInput.value.trim();
+           const amount = parseFloat(amountInput.value);
+           const date = dateInput.value.trim();
+           if (name && !isNaN(amount) && amount > 0) {
+               if(editIndex === -1) {
+                   expenses.push({ name, amount, date, checked: false });
+               } else {
+                   expenses[editIndex].name = name;
+                   expenses[editIndex].amount = amount;
+                   expenses[editIndex].date = date;
+                   cancelEdit();
+               }
+               nameInput.value = ''; amountInput.value = ''; dateInput.value = '';
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function editExpense(index) {
+           document.getElementById('formExpenseTitle').innerText = "Modifier la dépense ✏️";
+           document.getElementById('expenseName').value = expenses[index].name;
+           document.getElementById('expenseAmount').value = expenses[index].amount;
+           document.getElementById('expenseDate').value = expenses[index].date || '';
+           document.getElementById('editIndex').value = index;
+           document.getElementById('btnSubmitExpense').innerText = "OK";
+           document.getElementById('cancelEditBox').style.display = 'block';
+       }
+       function cancelEdit() {
+           document.getElementById('formExpenseTitle').innerText = "Nouvelle dépense";
+           document.getElementById('expenseName').value = '';
+           document.getElementById('expenseAmount').value = '';
+           document.getElementById('expenseDate').value = '';
+           document.getElementById('editIndex').value = "-1";
+           document.getElementById('btnSubmitExpense').innerText = "+";
+           document.getElementById('cancelEditBox').style.display = 'none';
+       }
+       function moveItem(index, direction) {
+           let targetIndex = index + direction;
+           if (targetIndex >= 0 && targetIndex < expenses.length) {
+               let temp = expenses[index];
+               expenses[index] = expenses[targetIndex];
+               expenses[targetIndex] = temp;
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function toggleBankCheck() { updateBankStyles(); calculateDistribution(); }
+       function toggleSavingsCheck() {
+           const isChecked = document.getElementById('checkSavings').checked;
+           let valSavings = parseFloat(document.getElementById('distSavingsText').innerText) || 0;
+           if (isChecked) { globalSavings += valSavings; } else { globalSavings -= valSavings; }
+           document.getElementById('globalSavingsInput').value = globalSavings;
+           updateBankStyles();
+           calculateDistribution();
+       }
+       function updateBankStyles() {
+           const boursorCheck = document.getElementById('checkBourso').checked;
+           const fortCheck = document.getElementById('checkFortuneo').checked;
+           const saveCheck = document.getElementById('checkSavings').checked;
+           document.getElementById('titleBourso').className = boursorCheck ? 'bank-title checked-text' : 'bank-title';
+           document.getElementById('statusBourso').innerText = boursorCheck ? 'Transféré ✓' : 'À transférer';
+           document.getElementById('statusBourso').style.color = boursorCheck ? 'var(--success)' : 'var(--text-secondary)';
+           document.getElementById('titleFortuneo').className = fortCheck ? 'bank-title checked-text' : 'bank-title';
+           document.getElementById('statusFortuneo').innerText = fortCheck ? 'Transféré ✓' : 'À transférer';
+           document.getElementById('statusFortuneo').style.color = fortCheck ? 'var(--success)' : 'var(--text-secondary)';
+           document.getElementById('titleSavings').className = saveCheck ? 'bank-title checked-text' : 'bank-title';
+           document.getElementById('statusSavings').innerText = saveCheck ? 'Transféré ✓' : 'À transférer';
+           document.getElementById('statusSavings').style.color = saveCheck ? 'var(--success)' : 'var(--text-secondary)';
+       }
+       function toggleCheck(index) { expenses[index].checked = !expenses[index].checked; saveToLocalStorage(); render(); }
+       function deleteExpense(index) { expenses.splice(index, 1); saveToLocalStorage(); render(); }
+       function renderHistory() {
+           const container = document.getElementById('historyContainer');
+           container.innerHTML = '';
+           if(historyLog.length === 0) {
+               container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:10px; font-size:13px;">Aucun mois clôturé.</div>';
+               return;
+           }
+           for(let i = historyLog.length - 1; i >= 0; i--) {
+               const log = historyLog[i];
+               const row = document.createElement('div');
+               row.className = 'history-item';
+               row.innerHTML = `
 <div class="history-left">
 <div class="history-date">${log.date}</div>
 <div class="history-details">
-<span>Salaire: ${log.sal}€</span>
+<span>Revenus: ${log.sal}€</span>
 <span>Charges: ${log.exp}€</span>
-<span style="color:var(--success); font-weight:600;">Reste à vivre: ${log.sav}€</span>
+<span style="color:var(--success); font-weight:600;">Reste: ${log.sav}€</span>
 </div>
 </div>
 <button class="action-btn" onclick="deleteHistoryItem(${i})" style="padding-left:12px; color:var(--danger);">✕</button>
-               `;
-               container.appendChild(row);
-           }
-       }
-
-       function deleteHistoryItem(index) {
-           if(confirm("Supprimer ce mois de l'historique ?")) {
-               historyLog.splice(index, 1);
-               saveToLocalStorage();
-               render();
-           }
-       }
-
-       function triggerNewMonth() {
-           if(confirm("Clôturer ce mois ? Les dépenses seront décochées pour le mois prochain.")) {
-               let dateObj = new Date();
-               let labelDate = dateObj.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
-
-               let totalExp = expenses.reduce((sum, e) => sum + e.amount, 0);
-               let rav = parseFloat(document.getElementById('dashResteAVivre').innerText) || 0;
-
-               historyLog.push({
-                   date: labelDate.charAt(0).toUpperCase() + labelDate.slice(1),
-                   sal: (parseFloat(document.getElementById('salaryInput').value) || 0).toFixed(0),
-                   exp: totalExp.toFixed(0),
-                   sav: rav.toFixed(0)
-               });
-
-               currentMonthWithdrawals = 0;
-               monthlySavingsOverride = null;
-
-               expenses.forEach(e => e.checked = false);
-               document.getElementById('checkBourso').checked = false;
-               document.getElementById('checkFortuneo').checked = false;
-               document.getElementById('checkSavings').checked = false;
-
-               saveToLocalStorage();
-               render();
-           }
-       }
-
-       function exportData() {
-           const data = { expenses, salary: document.getElementById('salaryInput').value, plafondBourso: document.getElementById('plafondBourso').value, plafondFortuneo: document.getElementById('plafondFortuneo').value, margeCA: document.getElementById('margeCA').value, aidesSociales: document.getElementById('aidesSocialesInput').value, globalSavings, historyLog };
-           document.getElementById('ioBuffer').value = btoa(JSON.stringify(data));
-       }
-
-       function importData() {
-           try {
-               const parsed = JSON.parse(atob(document.getElementById('ioBuffer').value.trim()));
-               if(parsed.expenses) expenses = parsed.expenses;
-               if(parsed.salary) document.getElementById('salaryInput').value = parsed.salary;
-               if(parsed.globalSavings !== undefined) globalSavings = parsed.globalSavings;
-               if(parsed.historyLog) historyLog = parsed.historyLog;
-               saveToLocalStorage();
-               render();
-               document.getElementById('ioBuffer').value = '';
-           } catch(e) { alert("Code invalide"); }
-       }
-
-       render();
+               `;
+               container.appendChild(row);
+           }
+       }
+       function deleteHistoryItem(index) {
+           if(confirm("Supprimer ce mois de l'historique ?")) {
+               historyLog.splice(index, 1);
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function triggerNewMonth() {
+           if(confirm("Clôturer ce mois ? Les dépenses seront décochées pour le mois prochain.")) {
+               let dateObj = new Date();
+               let labelDate = dateObj.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
+               let totalExp = expenses.reduce((sum, e) => sum + e.amount, 0);
+               let rav = parseFloat(document.getElementById('dashResteAVivre').innerText) || 0;
+               historyLog.push({
+                   date: labelDate.charAt(0).toUpperCase() + labelDate.slice(1),
+                   sal: (parseFloat(document.getElementById('salaryInput').value) || 0).toFixed(0),
+                   exp: totalExp.toFixed(0),
+                   sav: rav.toFixed(0)
+               });
+               currentMonthWithdrawals = 0;
+               expenses.forEach(e => e.checked = false);
+               document.getElementById('checkBourso').checked = false;
+               document.getElementById('checkFortuneo').checked = false;
+               document.getElementById('checkSavings').checked = false;
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function exportData() {
+           const data = { expenses, salary: document.getElementById('salaryInput').value, plafondBourso: document.getElementById('plafondBourso').value, plafondFortuneo: document.getElementById('plafondFortuneo').value, margeCA: document.getElementById('margeCA').value, aidesSociales: document.getElementById('aidesSocialesInput').value, globalSavings, historyLog };
+           document.getElementById('ioBuffer').value = btoa(JSON.stringify(data));
+       }
+       function importData() {
+           try {
+               const parsed = JSON.parse(atob(document.getElementById('ioBuffer').value.trim()));
+               if(parsed.expenses) expenses = parsed.expenses;
+               if(parsed.salary) document.getElementById('salaryInput').value = parsed.salary;
+               if(parsed.globalSavings !== undefined) globalSavings = parsed.globalSavings;
+               if(parsed.historyLog) historyLog = parsed.historyLog;
+               saveToLocalStorage();
+               render();
+               document.getElementById('ioBuffer').value = '';
+           } catch(e) { alert("Code invalide"); }
+       }
+       render();
 </script>
 </body>
 </html>
