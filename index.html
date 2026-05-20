@@ -144,10 +144,13 @@
            border: 1px solid rgba(52,199,89,0.3); border-radius: 10px; padding: 6px 8px; text-align: right; background: #ffffff;
        }
        .withdraw-input {
-           width: 80px; font-size: 14px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); text-align: right;
+           width: 70px; font-size: 14px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); text-align: right;
        }
        .btn-withdraw {
-           width: auto; padding: 6px 12px; font-size: 13px; background: var(--danger); box-shadow: none; border-radius: 8px;
+           width: auto; padding: 6px 10px; font-size: 13px; background: var(--primary); box-shadow: none; border-radius: 8px;
+       }
+       .btn-withdraw-reset {
+           width: auto; padding: 6px 10px; font-size: 13px; background: #fff; color: var(--danger); border: 1px solid var(--border); box-shadow: none; border-radius: 8px;
        }
        input[type="checkbox"] {
            width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
@@ -214,7 +217,7 @@
 <div class="balance-cell-right" id="dashGlobalSavings">0,00 €</div>
 </div>
 <div class="balance-row">
-<div class="balance-cell-left">Salaire mensuel disponible :</div>
+<div class="balance-cell-left">Reste à vivre mensuel :</div>
 <div class="balance-cell-right" id="dashSalaryTotalCard">0,00 €</div>
 </div>
 <div class="balance-row" id="rowCashback" style="color: #ffb3b3; font-weight: bold;">
@@ -246,10 +249,11 @@
 </div>
 <div style="border-top: 1px dashed rgba(52,199,89,0.2); margin-bottom: 10px;"></div>
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-<div style="font-size: 12px; color: #1c1c1e; font-weight: 600;">Montant récupéré de l'épargne :</div>
-<div style="display: flex; align-items: center; gap: 6px;">
+<div style="font-size: 12px; color: #1c1c1e; font-weight: 600;">Désépargner :</div>
+<div style="display: flex; align-items: center; gap: 4px;">
 <input type="number" id="withdrawInput" class="withdraw-input" placeholder="0" inputmode="decimal">
-<button onclick="executeWithdraw()" class="btn-withdraw">Valider</button>
+<button onclick="executeWithdraw()" class="btn-withdraw">OK</button>
+<button onclick="resetWithdraw()" class="btn-withdraw-reset" title="Réinitialiser la désépargne">Reset</button>
 </div>
 </div>
 </div>
@@ -434,6 +438,18 @@
            saveToLocalStorage();
            calculateDistribution();
        }
+       function resetWithdraw() {
+           if(currentMonthWithdrawals > 0) {
+               globalSavings += currentMonthWithdrawals;
+               currentMonthWithdrawals = 0;
+               document.getElementById('globalSavingsInput').value = globalSavings;
+               saveToLocalStorage();
+               calculateDistribution();
+               alert("La désépargne a été réinitialisée. L'argent a réintégré le coffre.");
+           } else {
+               alert("Aucune désépargne n'est active ce mois-ci.");
+           }
+       }
        function roundToFirstDigit(value) {
            if (value <= 0) return 0;
            let countRound = Math.floor(value);
@@ -483,7 +499,6 @@
            if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
            if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
            // 2. JAUGE 1 : RESTE À VIVRE MENSUEL
-           // Formule demandée : Salaire mensuel - (Les placements validés + nouvelles dépenses cochées)
            let monthlyRemaining = salaryVal - (placementsValides + paidExpenses);
            document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
            document.getElementById('dashPlacements').innerText = `${placementsValides.toFixed(2)} €`;
@@ -499,14 +514,14 @@
                else bar.style.backgroundColor = 'var(--danger)';
            } else { bar.style.width = '0%'; }
            // 3. JAUGE 2 : RESTE À VIVRE TOTAL (PATRIMOINE GLOBAL)
-           // Formule demandée : (Épargne totale + Salaire mensuel) - Desépargne effectuée
-           let totalRemainingWallet = (globalSavings + salaryVal) - currentMonthWithdrawals;
+           // CORRECTION : (Épargne totale + Reste à vivre mensuel) - Désépargne effectuée
+           let totalRemainingWallet = (globalSavings + monthlyRemaining) - currentMonthWithdrawals;
            document.getElementById('dashGlobalSavings').innerText = `${globalSavings.toFixed(2)} €`;
-           document.getElementById('dashSalaryTotalCard').innerText = `${salaryVal.toFixed(2)} €`;
+           document.getElementById('dashSalaryTotalCard').innerText = `${monthlyRemaining.toFixed(2)} €`;
            document.getElementById('dashCashback').innerText = `-${currentMonthWithdrawals.toFixed(2)} €`;
            document.getElementById('totalRemaining').innerText = `${totalRemainingWallet.toFixed(2)} €`;
            const totalBar = document.getElementById('totalProgressBar');
-           let baseTotalVolume = globalSavings + salaryVal;
+           let baseTotalVolume = globalSavings + monthlyRemaining;
            if (baseTotalVolume > 0) {
                let pctTotal = (totalRemainingWallet / baseTotalVolume) * 100;
                totalBar.style.width = `${Math.max(0, Math.min(100, pctTotal))}%`;
@@ -642,8 +657,11 @@
                document.getElementById('checkFortuneo').checked = false;
                document.getElementById('checkSavings').checked = false;
                document.getElementById('globalSavingsInput').value = globalSavings;
-               let newSalary = prompt("Saisissez le montant du nouveau salaire :", document.getElementById('salaryInput').value);
-               if(newSalary !== null) document.getElementById('salaryInput').value = newSalary;
+               let oldSalary = document.getElementById('salaryInput').value;
+               let newSalary = prompt("Saisissez le montant du nouveau salaire :", oldSalary);
+               if(newSalary !== null) {
+                   document.getElementById('salaryInput').value = newSalary;
+               }
                saveToLocalStorage();
                render();
            }
