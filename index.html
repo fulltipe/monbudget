@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Budget">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACZ663gAAAAAXNSR0IArs4c6QAAArNJREFUeF7t11ERAAAIwzA6F7YgBlGv6SgIdrKzs+sMECgJnAKpXTMgMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwSMCBgIMAQIEwwZ4gAD9pxtEwAAAAAElFTkSuQmCC">
+<title>Mon Budget Master Pro</title>
+<style>
+       :root {
+           --bg-color: #f2f2f7;
+           --card-bg: #ffffff;
+           --text-color: #1c1c1e;
+           --text-secondary: #8e8e93;
+           --primary: #007aff;
+           --danger: #ff3b30;
+           --success: #34c759;
+           --warning: #ff9500;
+           --border: #e5e5ea;
+           --accent-gradient: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+       }
+       * { box-sizing: border-box; }
+       body {
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+           background-color: var(--bg-color);
+           color: var(--text-color);
+           margin: 0;
+           padding: env(safe-area-inset-top) 16px 60px 16px;
+           -webkit-tap-highlight-color: transparent;
+       }
+       h1 {
+           font-size: 28px;
+           font-weight: 800;
+           margin: 24px 0 16px 0;
+           letter-spacing: -0.5px;
+       }
+       h2 {
+           font-size: 13px;
+           font-weight: 700;
+           margin: 28px 0 12px 4px;
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+           color: var(--text-secondary);
+       }
+       .card {
+           background: var(--card-bg);
+           border-radius: 16px;
+           padding: 18px;
+           box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+           margin-bottom: 20px;
+           border: 1px solid rgba(0, 0, 0, 0.02);
+       }
+       .main-dash {
+           background: var(--accent-gradient);
+           color: white;
+       }
+       .balance-row {
+           display: table;
+           width: 100%;
+           margin-bottom: 12px;
+           font-size: 14px;
+       }
+       .balance-cell-left { display: table-cell; text-align: left; opacity: 0.9; }
+       .balance-cell-right { display: table-cell; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+       .main-dash .balance-cell-left { opacity: 0.8; }
+       .balance-row.total {
+           margin-bottom: 0;
+           padding-top: 14px;
+           border-top: 1px solid rgba(255,255,255,0.15);
+           font-weight: 700;
+           font-size: 18px;
+       }
+       .progress-container {
+           margin-top: 12px;
+           background: rgba(255, 255, 255, 0.15);
+           border-radius: 6px;
+           height: 8px;
+           overflow: hidden;
+       }
+       .progress-bar {
+           background: var(--success);
+           height: 100%;
+           width: 100%;
+           transition: width 0.3s ease, background-color 0.3s ease;
+       }
+       .text-danger { color: var(--danger); }
+       .text-success { color: var(--success); }
+       .text-warning { color: var(--warning); }
+       .text-bold { font-weight: 700; }
+       .form-table {
+           display: table;
+           width: 100%;
+           border-collapse: separate;
+           border-spacing: 6px 0;
+           margin-left: -6px;
+           width: calc(100% + 12px);
+       }
+       .form-cell { display: table-cell; vertical-align: middle; }
+       input, button, textarea {
+           font-size: 15px;
+           padding: 12px;
+           border: 1px solid var(--border);
+           border-radius: 12px;
+           outline: none;
+           width: 100%;
+           background: var(--card-bg);
+           -webkit-appearance: none;
+       }
+       input:focus { border-color: var(--primary); }
+       button {
+           background: var(--primary);
+           color: white;
+           border: none;
+           font-weight: 600;
+           cursor: pointer;
+           box-shadow: 0 4px 12px rgba(0,122,255,0.15);
+           text-align: center;
+       }
+       button:active { opacity: 0.8; }
+       .btn-reset {
+           background: #fff;
+           color: var(--danger);
+           border: 1px solid var(--border);
+           box-shadow: none;
+           margin-top: 5px;
+       }
+       .bank-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+       .bank-item:last-child { border-bottom: none; }
+       .bank-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+       .bank-name-block { display: flex; align-items: center; gap: 12px; }
+       .bank-title { font-weight: 600; font-size: 16px; }
+       .bank-amount { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+       .bank-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); padding-left: 34px; }
+       .plafond-input { width: 65px; padding: 4px 6px; font-size: 13px; border-radius: 8px; text-align: center; display: inline-block; margin-left: 4px; border: 1px solid var(--border); }
+       .savings-input-global {
+           width: 110px; font-size: 18px; font-weight: 800; color: #248a3d;
+           border: 1px solid rgba(52,199,89,0.3); border-radius: 10px; padding: 6px 8px; text-align: right; background: #ffffff;
+       }
+       input[type="checkbox"] {
+           width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
+           background: #fff; cursor: pointer; padding: 0; margin: 0; position: relative; display: inline-block;
+       }
+       input[type="checkbox"]:checked { background-color: var(--success); border-color: var(--success); }
+       input[type="checkbox"]:checked::after {
+           content: ''; position: absolute; left: 7px; top: 3px; width: 5px; height: 10px;
+           border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+       }
+       .list-container { background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
+       .item-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--card-bg); }
+       .item-row:last-child { border-bottom: none; }
+       .item-left { display: flex; align-items: center; gap: 8px; flex: 1; }
+       .checked-text { text-decoration: line-through; color: var(--text-secondary); opacity: 0.6; }
+       .date-badge { font-size: 11px; color: var(--text-secondary); background: var(--bg-color); padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
+       .move-buttons { display: flex; flex-direction: column; gap: 2px; margin-right: 4px; }
+       .move-btn { background: none; border: none; color: #aeaea3; padding: 0; font-size: 11px; width: 16px; height: 14px; box-shadow: none; }
+       .action-btn { background: none; color: #aeaea3; border: none; padding: 0 6px; font-size: 15px; width: auto; box-shadow: none; }
+       .action-btn:active { color: var(--primary); }
+       .delete-btn:active { color: var(--danger); }
+       .history-item {
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           padding: 12px 0;
+           border-bottom: 1px solid var(--border);
+           font-size: 14px;
+       }
+       .history-item:last-child { border-bottom: none; }
+       .history-left { flex: 1; }
+       .history-date { font-weight: 700; color: var(--text-color); margin-bottom: 4px; }
+       .history-details { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 12px; padding-right: 8px; }
+</style>
+</head>
+<body>
+<h1>Mon Budget</h1>
+<div class="card main-dash">
+<div class="balance-row">
+<div class="balance-cell-left">Salaire mensuel :</div>
+<div class="balance-cell-right" id="dashSalary">0,00 €</div>
+</div>
+<div class="balance-row" id="rowCashback" style="display:none; color: var(--success); font-weight: bold;">
+<div class="balance-cell-left">Récupéré de l'Épargne (+) :</div>
+<div class="balance-cell-right" id="dashCashback">+0,00 €</div>
+</div>
+<div class="balance-row">
+<div class="balance-cell-left">Total charges prévues :</div>
+<div class="balance-cell-right" id="totalExpenses">0,00 €</div>
+</div>
+<div class="balance-row total">
+<div class="balance-cell-left">RESTE À VIVRE REEL :</div>
+<div class="balance-cell-right" id="salaryRemaining">0,00 €</div>
+</div>
+<div class="progress-container">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+</div>
+<div class="card" style="padding: 12px 18px;">
+<label style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Salaire Net Reçu :</label>
+<input type="number" id="salaryInput" placeholder="Saisir salaire" inputmode="decimal" oninput="calculateDistribution()">
+</div>
+<div class="card" style="background: #e9f5ec; border: 1px solid rgba(52,199,89,0.2); padding: 12px 18px;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<div>
+<div style="font-size: 14px; font-weight: 700; color: #248a3d;">Coffre Épargne Total</div>
+<div style="font-size: 11px; color: #34c759;" id="savingsSubtext">Modifiable à tout moment</div>
+</div>
+<div style="display: flex; align-items: center; gap: 4px;">
+<input type="number" id="globalSavingsInput" class="savings-input-global" placeholder="0" oninput="updateGlobalSavingsManual()">
+<span style="font-size: 18px; font-weight: 800; color: #248a3d;">€</span>
+</div>
+</div>
+</div>
+<h2>Plan de répartition & Virements</h2>
+<div class="card" style="padding-top: 4px; padding-bottom: 4px;">
+<div class="bank-item">
+<div class="bank-top">
+<div class="bank-name-block">
+<div style="width: 22px; text-align: center; color: var(--danger); font-weight: bold;">•</div>
+<span class="bank-title">1. Crédit Agricole</span>
+</div>
+<span class="bank-amount text-danger" id="distCA">0,00 €</span>
+</div>
+<div class="bank-bottom">
+<span id="formulaCA">Reste des charges + 50€</span>
+<span>Compte Pivot</span>
+</div>
+</div>
+<div class="bank-item">
+<div class="bank-top">
+<div class="bank-name-block">
+<input type="checkbox" id="checkBourso" onchange="toggleBankCheck()">
+<span class="bank-title" id="titleBourso">2. Boursorama</span>
+</div>
+<span class="bank-amount text-success" id="distBourso">0,00 €</span>
+</div>
+<div class="bank-bottom">
+<span>Plafond : <input type="number" id="plafondBourso" class="plafond-input" value="430" oninput="calculateDistribution()"> €</span>
+<span id="statusBourso">À transférer</span>
+</div>
+</div>
+<div class="bank-item">
+<div class="bank-top">
+<div class="bank-name-block">
+<input type="checkbox" id="checkFortuneo" onchange="toggleBankCheck()">
+<span class="bank-title" id="titleFortuneo">3. Fortuneo</span>
+</div>
+<span class="bank-amount text-success" id="distFortuneo">0,00 €</span>
+</div>
+<div class="bank-bottom">
+<span>Plafond : <input type="number" id="plafondFortuneo" class="plafond-input" value="800" oninput="calculateDistribution()"> €</span>
+<span id="statusFortuneo">À transférer</span>
+</div>
+</div>
+<div class="bank-item" style="border-bottom: none;">
+<div class="bank-top">
+<div class="bank-name-block">
+<input type="checkbox" id="checkSavings" onchange="toggleBankCheck()">
+<span class="bank-title" id="titleSavings">4. Épargne du Mois</span>
+</div>
+<span class="bank-amount" id="distSavings" style="color: #5856d6;">0 €</span>
+</div>
+<div class="bank-bottom">
+<span id="savingsFormatIntel" style="color:var(--text-secondary);">Arrondi Chiffre + Zéros</span>
+<span id="statusSavings">À transférer</span>
+</div>
+</div>
+</div>
+<h2 id="formExpenseTitle">Nouvelle dépense</h2>
+<div class="form-table" style="margin-bottom: 10px;">
+<input type="hidden" id="editIndex" value="-1">
+<div class="form-cell" style="width: 42%;">
+<input type="text" id="expenseName" placeholder="Nom (ex: EDF)">
+</div>
+<div class="form-cell" style="width: 25%;">
+<input type="number" id="expenseAmount" placeholder="Montant" inputmode="decimal">
+</div>
+<div class="form-cell" style="width: 18%;">
+<input type="text" id="expenseDate" placeholder="JJ/MM" style="padding: 12px 4px; text-align: center;">
+</div>
+<div class="form-cell" style="width: 15%;">
+<button onclick="saveExpense()" id="btnSubmitExpense">+</button>
+</div>
+</div>
+<div id="cancelEditBox" style="display:none; text-align:right; margin-bottom:10px; font-size:13px;">
+<a href="#" onclick="cancelEdit()" style="color:var(--danger); text-decoration:none;">Annuler la modification</a>
+</div>
+<h2>Liste des dépenses</h2>
+<div class="list-container" id="expenseList"></div>
+<button class="btn-reset" onclick="triggerNewMonth()">🔄 Commencer un Nouveau Mois</button>
+<h2>Historique des mois passés</h2>
+<div class="card" id="historyContainer" style="max-height: 200px; overflow-y: auto; padding-top: 4px; padding-bottom: 4px;"></div>
+<h2>Sauvegarde Système (Import / Export)</h2>
+<div class="card" style="padding: 12px 18px;">
+<div style="display: flex; gap: 8px; margin-bottom: 10px;">
+<button onclick="exportData()" style="background:#8e8e93; font-size:13px; padding:10px;">📤 Exporter</button>
+<button onclick="importData()" style="background:#8e8e93; font-size:13px; padding:10px;">📥 Importer</button>
+</div>
+<textarea id="ioBuffer" placeholder="Le code de sauvegarde s'affichera ici..." style="font-size:11px; height:60px; font-family:monospace; resize:none; color:var(--text-secondary);"></textarea>
+</div>
+<script>
+       let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+       let salary = localStorage.getItem('salary') || '';
+       let plafondBourso = localStorage.getItem('plafondBourso') || 430;
+       let plafondFortuneo = localStorage.getItem('plafondFortuneo') || 800;
+       let globalSavings = parseFloat(localStorage.getItem('globalSavings')) || 0;
+       let referenceSavings = parseFloat(localStorage.getItem('referenceSavings')) || globalSavings;
+       let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
+       let checkBoursoState = JSON.parse(localStorage.getItem('checkBoursoState')) || false;
+       let checkFortuneoState = JSON.parse(localStorage.getItem('checkFortuneoState')) || false;
+       let checkSavingsState = JSON.parse(localStorage.getItem('checkSavingsState')) || false;
+       document.getElementById('salaryInput').value = salary;
+       document.getElementById('plafondBourso').value = plafondBourso;
+       document.getElementById('plafondFortuneo').value = plafondFortuneo;
+       document.getElementById('globalSavingsInput').value = globalSavings;
+       document.getElementById('checkBourso').checked = checkBoursoState;
+       document.getElementById('checkFortuneo').checked = checkFortuneoState;
+       document.getElementById('checkSavings').checked = checkSavingsState;
+       if (localStorage.getItem('referenceSavings') === null) {
+           localStorage.setItem('referenceSavings', globalSavings);
+           referenceSavings = globalSavings;
+       }
+       function saveToLocalStorage() {
+           localStorage.setItem('expenses', JSON.stringify(expenses));
+           localStorage.setItem('salary', document.getElementById('salaryInput').value);
+           localStorage.setItem('plafondBourso', document.getElementById('plafondBourso').value);
+           localStorage.setItem('plafondFortuneo', document.getElementById('plafondFortuneo').value);
+           localStorage.setItem('globalSavings', globalSavings);
+           localStorage.setItem('referenceSavings', referenceSavings);
+           localStorage.setItem('historyLog', JSON.stringify(historyLog));
+           localStorage.setItem('checkBoursoState', document.getElementById('checkBourso').checked);
+           localStorage.setItem('checkFortuneoState', document.getElementById('checkFortuneo').checked);
+           localStorage.setItem('checkSavingsState', document.getElementById('checkSavings').checked);
+       }
+       function render() {
+           const list = document.getElementById('expenseList');
+           list.innerHTML = '';
+           let total = 0;
+           let paid = 0;
+           if(expenses.length === 0) {
+               list.innerHTML = '<div class="item-row" style="color: var(--text-secondary); justify-content: center; font-size: 14px;">Aucune dépense enregistrée</div>';
+           }
+           expenses.forEach((expense, index) => {
+               total += expense.amount;
+               if (expense.checked) paid += expense.amount;
+               const row = document.createElement('div');
+               row.className = 'item-row';
+               row.innerHTML = `
+<div class="item-left">
+<div class="move-buttons">
+<button class="move-btn" onclick="moveItem(${index}, -1)">▲</button>
+<button class="move-btn" onclick="moveItem(${index}, 1)">▼</button>
+</div>
+<input type="checkbox" ${expense.checked ? 'checked' : ''} onchange="toggleCheck(${index})">
+<span class="${expense.checked ? 'checked-text' : ''}">
+                           ${expense.name} ${expense.date ? `<span class="date-badge">${expense.date}</span>` : ''}
+</span>
+</div>
+<div style="display: flex; align-items: center; gap:4px;">
+<span style="font-variant-numeric: tabular-nums; font-weight: 500; margin-right:8px;">${expense.amount.toFixed(2)} €</span>
+<button class="action-btn" onclick="editExpense(${index})">✏️</button>
+<button class="action-btn delete-btn" onclick="deleteExpense(${index})">✕</button>
+</div>
+               `;
+               list.appendChild(row);
+           });
+           document.getElementById('totalExpenses').innerText = `${total.toFixed(2)} €`;
+           renderHistory();
+           updateBankStyles();
+           calculateDistribution();
+       }
+       function updateGlobalSavingsManual() {
+           const val = document.getElementById('globalSavingsInput').value;
+           globalSavings = val ? parseFloat(val) : 0;
+           if(globalSavings > referenceSavings) {
+               referenceSavings = globalSavings;
+           }
+           saveToLocalStorage();
+           calculateDistribution();
+       }
+       function roundToFirstDigit(value) {
+           if (value <= 0) return 0;
+           let countRound = Math.floor(value);
+           let orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(countRound)));
+           let firstDigit = Math.floor(countRound / orderOfMagnitude);
+           return firstDigit * orderOfMagnitude;
+       }
+       function calculateDistribution() {
+           const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
+           const pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
+           const pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
+           let cashback = 0;
+           if (globalSavings < referenceSavings) {
+               cashback = referenceSavings - globalSavings;
+               document.getElementById('rowCashback').style.display = 'table';
+               document.getElementById('dashCashback').innerText = `+${cashback.toFixed(2)} €`;
+               document.getElementById('savingsSubtext').innerText = `Désépargne active de ${cashback}€`;
+           } else {
+               document.getElementById('rowCashback').style.display = 'none';
+               document.getElementById('savingsSubtext').innerText = `Modifiable à tout moment`;
+           }
+           let totalAvailableSalary = salaryVal + cashback;
+           document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
+           let totalExpenses = 0;
+           let paidExpenses = 0;
+           expenses.forEach(e => {
+               totalExpenses += e.amount;
+               if(e.checked) paidExpenses += e.amount;
+           });
+           let resteAPayer = totalExpenses - paidExpenses;
+           let caAmount = totalAvailableSalary > 0 ? (resteAPayer + 50) : 0;
+           if (caAmount > totalAvailableSalary) caAmount = totalAvailableSalary;
+           document.getElementById('distCA').innerText = `${caAmount.toFixed(2)} €`;
+           document.getElementById('formulaCA').innerText = `Reste des charges (${resteAPayer.toFixed(2)}€) + 50€`;
+           let restant = totalAvailableSalary - caAmount;
+           let boursoAmount = 0;
+           if (restant > 0) {
+               boursoAmount = Math.min(restant, pBourso);
+               restant -= boursoAmount;
+           }
+           document.getElementById('distBourso').innerText = `${boursoAmount.toFixed(2)} €`;
+           let fortuneoAmount = 0;
+           if (restant > 0) {
+               fortuneoAmount = Math.min(restant, pFortuneo);
+               restant -= fortuneoAmount;
+           }
+           document.getElementById('distFortuneo').innerText = `${fortuneoAmount.toFixed(2)} €`;
+           let rawSavings = restant > 0 ? restant : 0;
+           let savingsAmount = roundToFirstDigit(rawSavings);
+           document.getElementById('distSavings').innerText = `${savingsAmount} €`;
+           let perteArrondi = rawSavings - savingsAmount;
+           document.getElementById('savingsFormatIntel').innerText = `Arrondi appliqué (-${perteArrondi.toFixed(2)}€)`;
+           let totalDebite = caAmount;
+           if(document.getElementById('checkBourso').checked) totalDebite += boursoAmount;
+           if(document.getElementById('checkFortuneo').checked) totalDebite += fortuneoAmount;
+           if(document.getElementById('checkSavings').checked) totalDebite += savingsAmount;
+           let walletRemaining = totalAvailableSalary - totalDebite;
+           document.getElementById('salaryRemaining').innerText = `${walletRemaining.toFixed(2)} €`;
+           const bar = document.getElementById('progressBar');
+           if (totalAvailableSalary > 0) {
+               let pct = (walletRemaining / totalAvailableSalary) * 100;
+               pct = Math.max(0, Math.min(100, pct));
+               bar.style.width = `${pct}%`;
+               if (pct > 40) bar.style.backgroundColor = 'var(--success)';
+               else if (pct > 15) bar.style.backgroundColor = 'var(--warning)';
+               else bar.style.backgroundColor = 'var(--danger)';
+           } else {
+               bar.style.width = '0%';
+           }
+           saveToLocalStorage();
+       }
+       function saveExpense() {
+           const nameInput = document.getElementById('expenseName');
+           const amountInput = document.getElementById('expenseAmount');
+           const dateInput = document.getElementById('expenseDate');
+           const editIndex = parseInt(document.getElementById('editIndex').value);
+           const name = nameInput.value.trim();
+           const amount = parseFloat(amountInput.value);
+           const date = dateInput.value.trim();
+           if (name && !isNaN(amount) && amount > 0) {
+               if(editIndex === -1) {
+                   expenses.push({ name, amount, date, checked: false });
+               } else {
+                   expenses[editIndex].name = name;
+                   expenses[editIndex].amount = amount;
+                   expenses[editIndex].date = date;
+                   cancelEdit();
+               }
+               nameInput.value = ''; amountInput.value = ''; dateInput.value = '';
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function editExpense(index) {
+           document.getElementById('formExpenseTitle').innerText = "Modifier la dépense ✏️";
+           document.getElementById('expenseName').value = expenses[index].name;
+           document.getElementById('expenseAmount').value = expenses[index].amount;
+           document.getElementById('expenseDate').value = expenses[index].date || '';
+           document.getElementById('editIndex').value = index;
+           document.getElementById('btnSubmitExpense').innerText = "OK";
+           document.getElementById('cancelEditBox').style.display = 'block';
+       }
+       function cancelEdit() {
+           document.getElementById('formExpenseTitle').innerText = "Nouvelle dépense";
+           document.getElementById('expenseName').value = '';
+           document.getElementById('expenseAmount').value = '';
+           document.getElementById('expenseDate').value = '';
+           document.getElementById('editIndex').value = "-1";
+           document.getElementById('btnSubmitExpense').innerText = "+";
+           document.getElementById('cancelEditBox').style.display = 'none';
+       }
+       function moveItem(index, direction) {
+           let targetIndex = index + direction;
+           if (targetIndex >= 0 && targetIndex < expenses.length) {
+               let temp = expenses[index];
+               expenses[index] = expenses[targetIndex];
+               expenses[targetIndex] = temp;
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function toggleBankCheck() { updateBankStyles(); calculateDistribution(); }
+       function updateBankStyles() {
+           const boursorCheck = document.getElementById('checkBourso').checked;
+           const fortCheck = document.getElementById('checkFortuneo').checked;
+           const saveCheck = document.getElementById('checkSavings').checked;
+           document.getElementById('titleBourso').className = boursorCheck ? 'bank-title checked-text' : 'bank-title';
+           document.getElementById('statusBourso').innerText = boursorCheck ? 'Transféré ✓' : 'À transférer';
+           document.getElementById('statusBourso').style.color = boursorCheck ? 'var(--success)' : 'var(--text-secondary)';
+           document.getElementById('titleFortuneo').className = fortCheck ? 'bank-title checked-text' : 'bank-title';
+           document.getElementById('statusFortuneo').innerText = fortCheck ? 'Transféré ✓' : 'À transférer';
+           document.getElementById('statusFortuneo').style.color = fortCheck ? 'var(--success)' : 'var(--text-secondary)';
+           document.getElementById('titleSavings').className = saveCheck ? 'bank-title checked-text' : 'bank-title';
+           document.getElementById('statusSavings').innerText = saveCheck ? 'Transféré ✓' : 'À transférer';
+           document.getElementById('statusSavings').style.color = saveCheck ? 'var(--success)' : 'var(--text-secondary)';
+       }
+       function toggleCheck(index) { expenses[index].checked = !expenses[index].checked; saveToLocalStorage(); render(); }
+       function deleteExpense(index) { expenses.splice(index, 1); saveToLocalStorage(); render(); }
+       function renderHistory() {
+           const container = document.getElementById('historyContainer');
+           container.innerHTML = '';
+           if(historyLog.length === 0) {
+               container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding:10px; font-size:13px;">Aucun mois clôturé pour le moment.</div>';
+               return;
+           }
+           for(let i = historyLog.length - 1; i >= 0; i--) {
+               const log = historyLog[i];
+               const row = document.createElement('div');
+               row.className = 'history-item';
+               row.innerHTML = `
+<div class="history-left">
+<div class="history-date">${log.date}</div>
+<div class="history-details">
+<span>Sal: ${log.sal}€</span>
+<span>Chg: ${log.exp}€</span>
+<span style="color:var(--success); font-weight:600;">+ Ép: ${log.sav}€</span>
+</div>
+</div>
+<button class="action-btn delete-btn" onclick="deleteHistoryItem(${i})" style="padding-left:12px;">✕</button>
+               `;
+               container.appendChild(row);
+           }
+       }
+       function deleteHistoryItem(index) {
+           let confirmation = confirm("Voulez-vous vraiment supprimer définitivement ce mois de l'historique ?");
+           if(confirmation) {
+               historyLog.splice(index, 1);
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function triggerNewMonth() {
+           let confirmation = confirm("Voulez-vous clôturer ce mois ? Les cases dépenses seront décochées, l'épargne du mois sera ajoutée au coffre, et la situation sera figée dans votre Historique.");
+           if(confirmation) {
+               let currentSavingsAmount = 0;
+               if(document.getElementById('checkSavings').checked) {
+                   currentSavingsAmount = roundToFirstDigit(parseFloat(document.getElementById('distSavings').innerText) || 0);
+                   globalSavings += currentSavingsAmount;
+               }
+               let dateObj = new Date();
+               let labelDate = dateObj.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'});
+               let currentExpTotal = parseFloat(document.getElementById('totalExpenses').innerText) || 0;
+               historyLog.push({
+                   date: labelDate.charAt(0).toUpperCase() + labelDate.slice(1),
+                   sal: document.getElementById('salaryInput').value || '0',
+                   exp: currentExpTotal.toFixed(0),
+                   sav: currentSavingsAmount
+               });
+               referenceSavings = globalSavings;
+               expenses.forEach(e => e.checked = false);
+               document.getElementById('checkBourso').checked = false;
+               document.getElementById('checkFortuneo').checked = false;
+               document.getElementById('checkSavings').checked = false;
+               document.getElementById('globalSavingsInput').value = globalSavings;
+               let newSalary = prompt("Saisissez le montant du nouveau salaire :", document.getElementById('salaryInput').value);
+               if(newSalary !== null) document.getElementById('salaryInput').value = newSalary;
+               saveToLocalStorage();
+               render();
+           }
+       }
+       function exportData() {
+           const dataDump = {
+               expenses,
+               salary: document.getElementById('salaryInput').value,
+               plafondBourso: document.getElementById('plafondBourso').value,
+               plafondFortuneo: document.getElementById('plafondFortuneo').value,
+               globalSavings,
+               referenceSavings,
+               historyLog
+           };
+           document.getElementById('ioBuffer').value = btoa(JSON.stringify(dataDump));
+           alert("Données exportées ! Copiez le code généré dans la zone de texte pour le sauvegarder.");
+       }
+       function importData() {
+           const buffer = document.getElementById('ioBuffer').value.trim();
+           if(!buffer) { alert("Veuillez coller un code d'importation valide dans la zone de texte."); return; }
+           try {
+               const parsed = JSON.parse(atob(buffer));
+               if (parsed.expenses) expenses = parsed.expenses;
+               if (parsed.salary) document.getElementById('salaryInput').value = parsed.salary;
+               if (parsed.plafondBourso) document.getElementById('plafondBourso').value = parsed.plafondBourso;
+               if (parsed.plafondFortuneo) document.getElementById('plafondFortuneo').value = parsed.plafondFortuneo;
+               if (parsed.globalSavings !== undefined) globalSavings = parsed.globalSavings;
+               if (parsed.referenceSavings !== undefined) referenceSavings = parsed.referenceSavings;
+               if (parsed.historyLog) historyLog = parsed.historyLog;
+               document.getElementById('globalSavingsInput').value = globalSavings;
+               saveToLocalStorage();
+               render();
+               alert("Données importées avec succès !");
+               document.getElementById('ioBuffer').value = '';
+           } catch(e) {
+               alert("Erreur lors de l'importation. Le code semble corrompu.");
+           }
+       }
+       render();
+</script>
+</body>
+</html>
