@@ -277,7 +277,7 @@
 <span class="bank-amount text-danger" id="distCA">0,00 €</span>
 </div>
 <div class="bank-bottom">
-<span id="formulaCA" style="flex: 1 1 100%;">Reste des charges + Secu + Aides</span>
+<span id="formulaCA" style="flex: 1 1 100%;">Charges + Secu + Aides</span>
 <span>Sécurité : <input type="number" id="margeCA" class="marge-input" value="50" oninput="calculateDistribution()"> €</span>
 <span>Aides : <input type="number" id="aidesSocialesInput" class="aides-input" value="0" oninput="calculateDistribution()"> €</span>
 </div>
@@ -489,9 +489,10 @@
                alert("Aucune désépargne n'est active ce mois-ci.");
            }
        }
-       function roundToNearestTen(value) {
+       // Modifié pour arrondir à la dizaine INFERIEURE (Math.floor)
+       function roundToNearestTenLower(value) {
            if (value <= 0) return 0;
-           return Math.round(value / 10) * 10;
+           return Math.floor(value / 10) * 10;
        }
        function calculateDistribution() {
            const salaryVal = parseFloat(document.getElementById('salaryInput').value) || 0;
@@ -508,29 +509,26 @@
                if(e.checked) paidExpenses += e.amount;
            });
            let resteAPayer = totalExpenses - paidExpenses;
-           // Calcul de la capacité de dispatching (Salaire dispo après reste à payer et base de sécurité + aides)
            let totalRevenus = salaryVal + aidesSocialesVal;
-           let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA + aidesSocialesVal) : 0;
-           if (tempCaAmount > totalRevenus) tempCaAmount = totalRevenus;
-           let tempRestant = totalRevenus - tempCaAmount;
-           let boursoAmount = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
-           tempRestant -= boursoAmount;
-           let fortuneoAmount = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
-           tempRestant -= fortuneoAmount;
-           let rawSavings = tempRestant > 0 ? tempRestant : 0;
-           let computedSavings = roundToNearestTen(rawSavings);
+           // Détermination des enveloppes cibles Boursorama et Fortuneo par rapport aux plafonds
+           let tempRestantPourPlacements = totalRevenus - (totalExpenses + baseMargeCA);
+           let boursoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pBourso) : 0;
+           tempRestantPourPlacements -= boursoAmount;
+           let fortuneoAmount = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
+           // Nouvelle Formule : (Salaire + Aides) - (Total liste dépenses + Bourso + Fortuneo)
+           let rawSavings = totalRevenus - (totalExpenses + boursoAmount + fortuneoAmount);
+           if (rawSavings < 0) rawSavings = 0;
+           // Application de l'arrondi à la dizaine INFERIEURE
+           let computedSavings = roundToNearestTenLower(rawSavings);
            let savingsAmount = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
+           // Ce qui n'est pas envoyé dans l'épargne suite à l'arrondi inférieur reste au CA
            let perteArrondi = rawSavings - savingsAmount;
            let finalMargeCA = baseMargeCA + perteArrondi;
-           // Enveloppe CA définitive intégrant les charges, la marge ajustée et l'intégralité des aides
+           // Attribution finale au Crédit Agricole (Couvre le reste à payer des charges + la sécurité ajustée + les aides reçues)
            let caAmount = salaryVal > 0 ? (resteAPayer + finalMargeCA + aidesSocialesVal) : 0;
            if (caAmount > totalRevenus) caAmount = totalRevenus;
            document.getElementById('distCA').innerText = `${caAmount.toFixed(2)} €`;
            document.getElementById('formulaCA').innerText = `Charges (${resteAPayer.toFixed(2)}€) + Sécu (${finalMargeCA.toFixed(2)}€) + Aides (${aidesSocialesVal.toFixed(2)}€)`;
-           let reelRestant = totalRevenus - caAmount;
-           boursoAmount = reelRestant > 0 ? Math.min(reelRestant, pBourso) : 0;
-           reelRestant -= boursoAmount;
-           fortuneoAmount = reelRestant > 0 ? Math.min(reelRestant, pFortuneo) : 0;
            document.getElementById('distBourso').innerText = `${boursoAmount.toFixed(2)} €`;
            document.getElementById('distFortuneo').innerText = `${fortuneoAmount.toFixed(2)} €`;
            if (document.activeElement !== document.getElementById('distSavingsInput')) {
@@ -539,15 +537,13 @@
            if (monthlySavingsOverride !== null) {
                document.getElementById('savingsFormatIntel').innerText = `Épargne forcée manuellement`;
            } else {
-               document.getElementById('savingsFormatIntel').innerText = perteArrondi >= 0
-                   ? `Arrondi : +${perteArrondi.toFixed(2)}€ injectés dans la sécurité CA`
-                   : `Arrondi : ${perteArrondi.toFixed(2)}€ compensés par la sécurité CA`;
+               document.getElementById('savingsFormatIntel').innerText = `Arrondi inf. : +${perteArrondi.toFixed(2)}€ laissés sur le CA`;
            }
            let placementsValides = 0;
            if(document.getElementById('checkBourso').checked) placementsValides += boursoAmount;
            if(document.getElementById('checkFortuneo').checked) placementsValides += fortuneoAmount;
            if(document.getElementById('checkSavings').checked) placementsValides += savingsAmount;
-           // NOUVELLE FORMULE : (Salaire mensuel net + Aides sociales) - (Placements validés + Dépenses réelles payées)
+           // Formule Reste à vivre : (Salaire + Aides) - (Placements validés + Dépenses payées)
            let monthlyRemaining = (salaryVal + aidesSocialesVal) - (placementsValides + paidExpenses);
            document.getElementById('dashSalary').innerText = `${salaryVal.toFixed(2)} €`;
            document.getElementById('dashAides').innerText = `${aidesSocialesVal.toFixed(2)} €`;
@@ -715,16 +711,14 @@
                let pBourso = parseFloat(document.getElementById('plafondBourso').value) || 0;
                let pFortuneo = parseFloat(document.getElementById('plafondFortuneo').value) || 0;
                let baseMargeCA = parseFloat(document.getElementById('margeCA').value) || 0;
-               let resteAPayer = totalExp - paidExpenses;
                let totalRevenus = salaryVal + aidesVal;
-               let tempCaAmount = salaryVal > 0 ? (resteAPayer + baseMargeCA + aidesVal) : 0;
-               if (tempCaAmount > totalRevenus) tempCaAmount = totalRevenus;
-               let tempRestant = totalRevenus - tempCaAmount;
-               let bAmt = tempRestant > 0 ? Math.min(tempRestant, pBourso) : 0;
-               tempRestant -= bAmt;
-               let fAmt = tempRestant > 0 ? Math.min(tempRestant, pFortuneo) : 0;
-               tempRestant -= fAmt;
-               let computedSavings = roundToNearestTen(tempRestant > 0 ? tempRestant : 0);
+               let tempRestantPourPlacements = totalRevenus - (totalExp + baseMargeCA);
+               let bAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pBourso) : 0;
+               tempRestantPourPlacements -= bAmt;
+               let fAmt = tempRestantPourPlacements > 0 ? Math.min(tempRestantPourPlacements, pFortuneo) : 0;
+               let rawSavings = totalRevenus - (totalExp + bAmt + fAmt);
+               if (rawSavings < 0) rawSavings = 0;
+               let computedSavings = roundToNearestTenLower(rawSavings);
                let sAmt = (monthlySavingsOverride !== null) ? monthlySavingsOverride : computedSavings;
                let pValides = bAmt + fAmt + sAmt;
                let monthlyRemainingLog = (salaryVal + aidesVal) - (pValides + paidExpenses);
